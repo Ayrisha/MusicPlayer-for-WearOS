@@ -10,4 +10,5 @@
     <string name="title_activity_play_list_screen">PlayListScreen</string>
     <string name="title_activity_song_screen">SongScreen</string>
     <string name="title_activity_playlist_screen">PlaylistScreen</string>
+    <string name="title_activity_menu_screen">MenuScreen</string>
 </resources>

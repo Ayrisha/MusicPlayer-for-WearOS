@@ -1,4 +1,4 @@
-package com.example.musicplayer.presentation
+package com.example.musicplayer
 
 import androidx.media3.common.util.UnstableApi
 import com.google.android.horologist.annotations.ExperimentalHorologistApi

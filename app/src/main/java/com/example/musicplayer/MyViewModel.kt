@@ -1,4 +1,4 @@
-package com.example.musicplayer.presentation
+package com.example.musicplayer
 
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
