@@ -1,4 +1,4 @@
-package com.example.musicplayer.screens
+package com.example.musicplayer.ui.screens
 
 import androidx.compose.runtime.Composable
 
