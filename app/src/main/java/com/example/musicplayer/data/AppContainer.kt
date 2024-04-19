@@ -1,6 +1,6 @@
 package com.example.musicplayer.data
 
-import com.example.musicplayer.network.MusicService
+import com.example.musicplayer.data.network.MusicService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

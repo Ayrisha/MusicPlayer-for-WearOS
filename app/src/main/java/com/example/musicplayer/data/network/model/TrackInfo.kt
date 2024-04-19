@@ -1,4 +1,4 @@
-package com.example.musicplayer.network.model
+package com.example.musicplayer.data.network.model
 
 import com.google.gson.annotations.SerializedName
 

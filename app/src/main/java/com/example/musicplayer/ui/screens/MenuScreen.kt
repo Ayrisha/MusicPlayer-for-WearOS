@@ -48,7 +48,7 @@ fun MenuScreen(navController: NavController) {
                 columns = GridCells.Fixed(2),
             ) {
                 item { MenuItem("Поиск", R.drawable.search, navController, "song_search") }
-                item { MenuItem("Любимое", R.drawable.heart_outline, navController,"like_music") }
+                item { MenuItem("Любимое", R.drawable.heart_outline, navController,"AuthScreen") }
                 item { MenuItem("Плейлисты", R.drawable.playlist_music_outline, navController,"playlists") }
                 item { MenuItem("Скачанное", R.drawable.tray_arrow_down, navController,"load_musics") }
             }

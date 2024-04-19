@@ -36,19 +36,19 @@ fun SongCard(
             .fillMaxSize()
     ) {
         Row{
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(topEnd = 8.dp, topStart = 8.dp)),
-                model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(img?.replace("http", "https"))
-                    .crossfade(true)
-                    .build(),
-                error = painterResource(id = R.drawable.default_img),
-                placeholder = painterResource(id = R.drawable.default_img),
-                contentDescription = "img",
-                contentScale = ContentScale.Crop
-            )
+//            AsyncImage(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .clip(RoundedCornerShape(topEnd = 8.dp, topStart = 8.dp)),
+//                model = ImageRequest.Builder(context = LocalContext.current)
+//                    .data(img?.replace("http", "https"))
+//                    .crossfade(true)
+//                    .build(),
+//                error = painterResource(id = R.drawable.default_img),
+//                placeholder = painterResource(id = R.drawable.default_img),
+//                contentDescription = "img",
+//                contentScale = ContentScale.Crop
+//            )
             Icon(
                 imageVector = Icons.Rounded.AccountCircle,
                 contentDescription = "photo",

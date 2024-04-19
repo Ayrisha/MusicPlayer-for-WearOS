@@ -40,6 +40,8 @@ fun SearchScreen(
 
     val listState = rememberLazyListState()
 
+    trackViewModel.popularTrack()
+
     Scaffold(
         timeText = {
             TimeText()
@@ -69,7 +71,12 @@ fun SearchScreen(
                 is TrackUiState.Success ->
                     SongList(
                         listState = listState,
-                        songUiState = songUiState,
+                        listTrack = songUiState.trackSearches,
+                        navController = navController)
+                is TrackUiState.Start ->
+                    SongList(
+                        listState = listState,
+                        listTrack = songUiState.trackPopular,
                         navController = navController)
                 is TrackUiState.Empty -> EmptyBox()
                 is TrackUiState.Loading -> Loading()

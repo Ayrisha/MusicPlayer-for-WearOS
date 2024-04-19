@@ -11,11 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.musicplayer.TrackUiState
+import com.example.musicplayer.data.Track
 
 @Composable
 fun SongList(
     listState: LazyListState,
-    songUiState: TrackUiState.Success,
+    listTrack: List<Track>,
     navController: NavController
 ) {
     LazyColumn(
@@ -27,7 +28,7 @@ fun SongList(
         ),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        items(songUiState.trackSearches) { item ->
+        items(listTrack) { item ->
             SongCard(
                 navController = navController,
                 id = item.id,

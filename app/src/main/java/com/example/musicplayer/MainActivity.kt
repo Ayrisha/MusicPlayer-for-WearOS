@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavType
@@ -12,14 +13,17 @@ import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.example.musicplayer.ui.screens.AuthScreen
 import com.example.musicplayer.ui.screens.LikeScreen
 import com.example.musicplayer.ui.screens.LoadMusicScreen
 import com.example.musicplayer.ui.screens.MenuScreen
 import com.example.musicplayer.ui.screens.PlayScreen
 import com.example.musicplayer.ui.screens.PlaylistScreen
 import com.example.musicplayer.ui.screens.SearchScreen
+import org.checkerframework.checker.units.qual.A
 
 class MainActivity : ComponentActivity() {
+  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
   @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
   @OptIn(UnstableApi::class) override fun onCreate(savedInstanceState: Bundle?) {
       super.onCreate(savedInstanceState)
@@ -31,6 +35,9 @@ class MainActivity : ComponentActivity() {
                 navController = navController,
                 startDestination = "menu_screen"
             ) {
+                composable("AuthScreen") {
+                    AuthScreen()
+                }
                 composable("menu_screen") {
                     MenuScreen(navController)
                 }

@@ -1,3 +1,9 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -63,6 +69,7 @@ dependencies {
     implementation("androidx.wear.compose:compose-foundation:1.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
+    implementation ("androidx.fragment:fragment-ktx:1.6.2")
 
     // https://mavenlibs.com/maven/dependency/com.google.android.horologist/horologist-media-ui
     implementation ("com.google.android.horologist:horologist-media-ui:0.5.4")
@@ -85,10 +92,28 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.6.0")
     // Retrofit with Scalar Converter
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.2")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.2")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("androidx.wear:wear-phone-interactions:1.0.1")
+
+    // Auth
+    implementation ("com.google.android.libraries.identity.googleid:googleid:1.1.0")
+    implementation ("androidx.credentials:credentials:1.2.2")
+    implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")
+    implementation("com.google.gms:google-services:4.4.1")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("androidx.wear:wear-remote-interactions:1.0.0")
+    implementation("io.appwrite:sdk-for-android:5.0.0")
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
 
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")

@@ -21,6 +21,7 @@ import java.io.IOException
 
 sealed interface TrackUiState{
     data class Success(val trackSearches: List<Track>) : TrackUiState
+    data class Start(val trackPopular: List<Track>) : TrackUiState
     object Empty : TrackUiState
     object Error : TrackUiState
     object Loading : TrackUiState
@@ -37,10 +38,27 @@ class TrackViewModel (
         mutableStateOf(value = "")
     val searchTextState: State<String> = _searchTextState
 
+    fun popularTrack(){
+        viewModelScope.launch {
+            trackUiState = try {
+                val listPopularTrack = musicPlayerRepository.popularTrack()
+                if (listPopularTrack.isEmpty()){
+                    TrackUiState.Error
+                }
+                else{
+                    TrackUiState.Start(trackPopular = listPopularTrack)
+                }
+            } catch (e: IOException){
+                TrackUiState.Error
+            } catch (e: HttpException){
+                TrackUiState.Error
+            }
+        }
+    }
+
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun searchTrack(title: String){
         viewModelScope.launch {
-            trackUiState = TrackUiState.Loading
             trackUiState = try {
                 val listTrack = musicPlayerRepository.searchTrack(title)
                 if (listTrack.isEmpty()){
