@@ -19,7 +19,7 @@ import androidx.wear.compose.material.VignettePosition
 import com.example.musicplayer.TrackUiState
 import com.example.musicplayer.TrackViewModel
 import com.example.musicplayer.ui.components.EmptyBox
-import com.example.musicplayer.ui.components.Error
+import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.Loading
 import com.example.musicplayer.ui.components.SearchBar
 import com.example.musicplayer.ui.components.SongList
@@ -81,7 +81,7 @@ fun SearchScreen(
                 is TrackUiState.Empty -> EmptyBox()
                 is TrackUiState.Loading -> Loading()
                 is TrackUiState.Error ->
-                    Error(
+                    Retry(
                         retryAction = {
                             trackViewModel.searchTrack(
                                 searchTextState.value
@@ -91,4 +91,3 @@ fun SearchScreen(
         }
     }
 }
-

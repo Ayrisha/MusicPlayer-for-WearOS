@@ -106,6 +106,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("androidx.wear:wear-remote-interactions:1.0.0")
     implementation("io.appwrite:sdk-for-android:5.0.0")
+    implementation("androidx.room:room-ktx:2.6.1")
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")

@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Vibrator
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.musicplayer.PlayerViewModel
@@ -16,17 +17,19 @@ import com.google.android.horologist.media.ui.screens.player.PlayerScreen
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @androidx.annotation.OptIn(UnstableApi::class) @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun PlayScreen(context: Context, id: String) {
-    val player = ExoPlayer.Builder(context).build()
-    val playerViewModel = PlayerViewModel(player)
+fun PlayScreen(
+    player: ExoPlayer,
+    playerViewModel: PlayerViewModel,
+    volumeViewModel: VolumeViewModel,
+    context: Context,
+    id: String
+) {
     playerViewModel.setTrack(id)
-    val volumeViewModel = createVolumeViewModel(context)
-
     PlayerScreen(playerViewModel, volumeViewModel)
 }
 
 @OptIn(ExperimentalHorologistApi::class)
-private fun createVolumeViewModel(context: Context): VolumeViewModel {
+fun createVolumeViewModel(context: Context): VolumeViewModel {
     val audioRepository = SystemAudioRepository.fromContext(context)
     val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
     return VolumeViewModel(audioRepository, audioRepository, onCleared = {

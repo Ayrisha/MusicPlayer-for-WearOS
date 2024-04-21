@@ -4,10 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.credentials.GetCredentialException
 import android.os.Build
-import android.util.Base64
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -20,13 +17,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
-import com.google.android.horologist.media.ui.components.display.MessageMediaDisplay
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
-import java.security.SecureRandom
 import java.util.UUID
 
 
@@ -36,7 +31,6 @@ private const val CLIENT_ID =
 
 class AuthGoogleViewModel(application: Application) : AndroidViewModel(application) {
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun startAuthFlow(context: Context) {
         viewModelScope.launch {
             val credentialManager = CredentialManager.create(context)
@@ -57,14 +51,16 @@ class AuthGoogleViewModel(application: Application) : AndroidViewModel(applicati
                 .addCredentialOption(googleIdOption)
                 .build()
 
-            try {
-                val result = credentialManager.getCredential(
-                    request = request,
-                    context = context,
-                )
-                handleSignIn(result)
-            } catch (e: GetCredentialException) {
-                Log.d(TAG, "Get Credential Exception")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                try {
+                    val result = credentialManager.getCredential(
+                        request = request,
+                        context = context,
+                    )
+                    handleSignIn(result)
+                } catch (e: GetCredentialException) {
+                    Log.d(TAG, "Get Credential Exception")
+                }
             }
         }
     }

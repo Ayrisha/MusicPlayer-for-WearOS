@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.ContentAlpha
 
 @Composable
@@ -29,7 +31,7 @@ fun SearchBar(
 ) {
     TextField(
         modifier = Modifier
-            .size(155.dp, 90.dp)
+            .size(155.dp, 85.dp)
             .padding(top = 30.dp, bottom = 10.dp),
         value = text,
         onValueChange = {
@@ -38,8 +40,8 @@ fun SearchBar(
         singleLine = true,
         leadingIcon = {
             IconButton(
-                modifier = Modifier
-                    .alpha(ContentAlpha.medium),
+                modifier = Modifier.size(15.dp)
+                    .alpha(ContentAlpha.disabled),
                 onClick = { onSearchClicked(text) }
             ) {
                 Icon(
@@ -60,6 +62,7 @@ fun SearchBar(
                 keyboardController?.hide()
             }
         ),
+        textStyle = TextStyle.Default.copy(fontSize = 15.sp),
         shape = RoundedCornerShape(20.dp),
         colors = TextFieldDefaults.colors(
             focusedTextColor = Color.White,

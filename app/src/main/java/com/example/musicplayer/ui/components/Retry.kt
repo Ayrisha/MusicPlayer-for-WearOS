@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Text
 
 @Composable
-fun Error (
+fun Retry (
     retryAction: () -> Unit
 ){
     Column (

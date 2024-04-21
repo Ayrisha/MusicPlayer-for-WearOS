@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">MusicPlayer</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
-    <string name="hello_world">From the Square world,\nHello, %1$s!</string>
     <string name="title_activity_playlists_download_screen">PlaylistsDownloadScreen</string>
     <string name="title_activity_playlist_streaming_screen">PlaylistStreamingScreen</string>
     <string name="title_activity_play_list_screen">PlayListScreen</string>
