@@ -11,7 +11,8 @@ interface AppContainer{
 }
 
 class DefaultAppContainer : AppContainer{
-    private val BASE_URL = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/"
+
+    private val BASE_URL = "http://45.15.158.128:8080"
 
     private val logging : HttpLoggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     private val httpClient : OkHttpClient.Builder = OkHttpClient.Builder().addInterceptor(logging)

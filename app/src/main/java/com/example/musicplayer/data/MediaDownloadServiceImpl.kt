@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.data
 
 import androidx.media3.common.util.UnstableApi
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -8,4 +8,6 @@ import com.google.android.horologist.media.data.service.download.MediaDownloadSe
 abstract class MediaDownloadServiceImpl : MediaDownloadService(FOREGROUND_NOTIFICATION_ID_NONE,
     0, "0", 0,
     0, 0) {
+
+
 }

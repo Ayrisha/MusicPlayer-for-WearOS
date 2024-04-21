@@ -2,27 +2,30 @@ package com.example.musicplayer.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresExtension
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
-import com.example.musicplayer.TrackUiState
-import com.example.musicplayer.TrackViewModel
+import com.example.musicplayer.ui.viewModel.TrackUiState
+import com.example.musicplayer.ui.viewModel.TrackViewModel
 import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.Loading
 import com.example.musicplayer.ui.components.SearchBar
-import com.example.musicplayer.ui.components.SongList
+import com.example.musicplayer.ui.components.SongCard
 
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
@@ -40,12 +43,11 @@ fun SearchScreen(
 
     val listState = rememberLazyListState()
 
-    trackViewModel.popularTrack()
+    if (searchTextState.value.isEmpty()) {
+        trackViewModel.popularTrack()
+    }
 
     Scaffold(
-        timeText = {
-            TimeText()
-        },
         vignette = {
             Vignette(vignettePosition = VignettePosition.Bottom)
         },
@@ -53,40 +55,66 @@ fun SearchScreen(
             PositionIndicator(lazyListState = listState)
         }
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            state = listState,
+            contentPadding = PaddingValues(
+                top = 30.dp,
+                start = 10.dp,
+                end = 10.dp,
+                bottom = 10.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            SearchBar(
-                text = searchTextState.value,
-                onTextChange = {
-                    trackViewModel.updateSearchTextState(it)
-                },
-                onSearchClicked = {
-                    trackViewModel.searchTrack(it)
-                },
-                keyboardController = keyboardController
-            )
+            item {
+                SearchBar(
+                    text = searchTextState.value,
+                    onTextChange = {
+                        trackViewModel.updateSearchTextState(it)
+                    },
+                    onSearchClicked = {
+                        trackViewModel.searchTrack(it)
+                    },
+                    keyboardController = keyboardController
+                )
+            }
             when (songUiState) {
-                is TrackUiState.Success ->
-                    SongList(
-                        listState = listState,
-                        listTrack = songUiState.trackSearches,
-                        navController = navController)
                 is TrackUiState.Start ->
-                    SongList(
-                        listState = listState,
-                        listTrack = songUiState.trackPopular,
-                        navController = navController)
-                is TrackUiState.Empty -> EmptyBox()
-                is TrackUiState.Loading -> Loading()
+                    items(songUiState.trackPopular) { item ->
+                        SongCard(
+                            list = songUiState.trackPopular,
+                            navController = navController,
+                            id = item.id,
+                            title = item.title,
+                            artist = item.artist,
+                            img = item.imgLink
+                        )
+                    }
+
+                is TrackUiState.Success ->
+                    items(songUiState.trackSearches) { item ->
+                        SongCard(
+                            list = songUiState.trackSearches,
+                            navController = navController,
+                            id = item.id,
+                            title = item.title,
+                            artist = item.artist,
+                            img = item.imgLink
+                        )
+                    }
+
+                is TrackUiState.Empty -> item { EmptyBox() }
+                is TrackUiState.Loading -> item { Loading() }
                 is TrackUiState.Error ->
-                    Retry(
-                        retryAction = {
-                            trackViewModel.searchTrack(
-                                searchTextState.value
-                            )
-                        })
+                    item {
+                        Retry(
+                            retryAction = {
+                                trackViewModel.searchTrack(
+                                    searchTextState.value
+                                )
+                            })
+                    }
             }
         }
     }

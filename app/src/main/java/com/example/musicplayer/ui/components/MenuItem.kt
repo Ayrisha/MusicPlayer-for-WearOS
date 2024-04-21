@@ -20,10 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuItem(
     contents: String,
@@ -41,7 +41,7 @@ fun MenuItem(
             containerColor = Color(0xFF1C1B1F)
         ),
         modifier = Modifier
-            .size(80.dp),
+            .size(70.dp),
         onClick = { navController.navigate(screen) }
     ) {
         Box(
@@ -57,7 +57,9 @@ fun MenuItem(
                     contentDescription = "item image",
                     modifier = Modifier.size(25.dp)
                 )
-                Text(text = contents)
+                Text(
+                    text = contents,
+                    fontSize = 10.sp)
             }
         }
     }

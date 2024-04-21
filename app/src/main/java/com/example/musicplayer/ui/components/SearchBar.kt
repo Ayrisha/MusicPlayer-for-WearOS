@@ -31,8 +31,8 @@ fun SearchBar(
 ) {
     TextField(
         modifier = Modifier
-            .size(155.dp, 85.dp)
-            .padding(top = 30.dp, bottom = 10.dp),
+            .size(155.dp, 55.dp)
+            .padding(bottom = 10.dp),
         value = text,
         onValueChange = {
             onTextChange(it)
@@ -62,7 +62,7 @@ fun SearchBar(
                 keyboardController?.hide()
             }
         ),
-        textStyle = TextStyle.Default.copy(fontSize = 15.sp),
+        textStyle = TextStyle.Default.copy(fontSize = 10.sp),
         shape = RoundedCornerShape(20.dp),
         colors = TextFieldDefaults.colors(
             focusedTextColor = Color.White,

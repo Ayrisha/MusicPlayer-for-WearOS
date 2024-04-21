@@ -6,6 +6,7 @@ interface MusicPlayerRepository {
     suspend fun searchTrack(title: String): List<Track>
     suspend fun popularTrack(): List<Track>
     suspend fun newTrack(): List<Track>
+    suspend fun sedCode(code: String)
 }
 
 class NetworkMusicPlayerRepository(
@@ -38,5 +39,9 @@ class NetworkMusicPlayerRepository(
             artist = items.artist,
             imgLink = items.trackCoverId
         )
+    }
+
+    override suspend fun sedCode(code: String) {
+        musicService.sendCode(code)
     }
 }

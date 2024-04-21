@@ -35,17 +35,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.wear.activity.ConfirmationActivity
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
-import com.example.musicplayer.ui.components.MinimalDialog
+import com.example.musicplayer.MusicApplication
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
+import com.example.musicplayer.data.AppPreferences
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private const val CLIENT_ID =
     "550470458277-2dvd7f06dd8npndqtc6o9kt9tcudjofn.apps.googleusercontent.com"
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun AuthScreen(
     navController: NavController,
@@ -63,11 +69,20 @@ fun AuthScreen(
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 try {
                     val account = task.getResult(ApiException::class.java)
+//                    val application = context.applicationContext as MusicApplication
+//                    val musicRepository = application.container.musicPlayerRepository
+//
+//                    GlobalScope.launch{
+//                        musicRepository.sedCode(account.serverAuthCode.toString())
+//                    }
+
+                    AppPreferences.isLogin = true
                     isSignedIn = true
+
                     navController.navigate("menu_screen/$isSignedIn/${account.email}")
                     Log.d(
                         "GoogleSignInActivity",
-                        "signInResult:success account=${account?.serverAuthCode}"
+                        "signInResult:success account=${account.serverAuthCode}"
                     )
                 } catch (e: ApiException) {
                     showDialogState = true
@@ -83,7 +98,14 @@ fun AuthScreen(
         }
 
     if (showDialogState) {
-        MinimalDialog(onDismissRequest = { showDialogState = false }, text = "Не удалось выполнить вход")
+        val activity = LocalContext.current as Activity
+        val intent = Intent(activity, ConfirmationActivity::class.java).apply {
+            putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.FAILURE_ANIMATION)
+            putExtra(ConfirmationActivity.EXTRA_MESSAGE, "Не удалось выполнить вход")
+            putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
+        }
+        activity.startActivity(intent)
+        showDialogState = false
     }
 
     Scaffold(
@@ -129,7 +151,7 @@ fun AuthScreen(
 fun signInWithGoogle(googleSignInLauncher: ActivityResultLauncher<Intent>, context: Context) {
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestServerAuthCode(CLIENT_ID)
-        .requestScopes(Scope("https://www.googleapis.com/auth/userinfo.profile"))
+        .requestScopes(Scope("openid"))
         .requestEmail()
         .build()
     val signIn = GoogleSignIn.getClient(context, gso)

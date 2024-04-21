@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.ui.viewModel
 
 import android.net.http.HttpException
 import android.os.Build
@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.data.Track
 import kotlinx.coroutines.launch

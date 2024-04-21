@@ -17,7 +17,7 @@
         android:theme="@android:style/Theme.DeviceDefault">
 
         <service
-            android:name=".MediaDownloadServiceImpl"
+            android:name=".data.MediaDownloadServiceImpl"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.exoplayer.downloadService.action.RESTART" />
@@ -48,6 +48,11 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name="androidx.wear.activity.ConfirmationActivity"
+            android:taskAffinity="">
         </activity>
 
     </application>

@@ -1,5 +1,7 @@
 package com.example.musicplayer.ui.screens
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,36 +9,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.activity.ConfirmationActivity
 import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
-import androidx.wear.compose.material.scrollAway
 import com.example.musicplayer.R
 import com.example.musicplayer.ui.components.MenuItem
-import com.example.musicplayer.ui.components.MinimalDialog
-import kotlinx.coroutines.delay
 
 @Composable
 fun MenuScreen(navController: NavController, showDialog: Boolean? = false, username: String? = "") {
-    val listState = rememberScalingLazyListState()
 
     var showDialogState by remember { mutableStateOf(showDialog) }
 
     Scaffold(
-        timeText = {
-            TimeText(modifier = Modifier.scrollAway(listState))
-        },
         vignette = {
             Vignette(vignettePosition = VignettePosition.TopAndBottom)
         }
@@ -47,17 +41,17 @@ fun MenuScreen(navController: NavController, showDialog: Boolean? = false, usern
         ) {
             LazyVerticalGrid(
                 contentPadding = PaddingValues(
-                    top = 20.dp,
+                    top = 10.dp,
                     start = 20.dp,
                     end = 20.dp,
-                    bottom = 20.dp
+                    bottom = 10.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 columns = GridCells.Fixed(2),
             ) {
                 item { MenuItem("Поиск", R.drawable.search, navController, "song_search") }
-                item { MenuItem("Любимое", R.drawable.heart_outline, navController, "AuthScreen") }
+                item { MenuItem("Любимое", R.drawable.heart_outline, navController, "like_music") }
                 item {
                     MenuItem(
                         "Плейлисты",
@@ -79,11 +73,14 @@ fun MenuScreen(navController: NavController, showDialog: Boolean? = false, usern
     }
 
     if (showDialogState == true) {
-        LaunchedEffect(Unit) {
-            delay(5000)
-            showDialogState = false
+        val activity = LocalContext.current as Activity
+        val intent = Intent(activity, ConfirmationActivity::class.java).apply {
+            putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION)
+            putExtra(ConfirmationActivity.EXTRA_MESSAGE, username)
+            putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
         }
-        MinimalDialog(onDismissRequest = { showDialogState = false }, text = "$username\n Вход выполнен")
+        activity.startActivity(intent)
+        showDialogState = false
     }
 }
 
