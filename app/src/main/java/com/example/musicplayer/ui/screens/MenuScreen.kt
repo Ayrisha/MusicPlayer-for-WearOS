@@ -23,12 +23,11 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import com.example.musicplayer.R
+import com.example.musicplayer.data.AppPreferences
 import com.example.musicplayer.ui.components.MenuItem
 
 @Composable
-fun MenuScreen(navController: NavController, showDialog: Boolean? = false, username: String? = "") {
-
-    var showDialogState by remember { mutableStateOf(showDialog) }
+fun MenuScreen(navController: NavController, username: String? = "") {
 
     Scaffold(
         vignette = {
@@ -72,7 +71,7 @@ fun MenuScreen(navController: NavController, showDialog: Boolean? = false, usern
         }
     }
 
-    if (showDialogState == true) {
+    if (AppPreferences.isLogin && !AppPreferences.isShow) {
         val activity = LocalContext.current as Activity
         val intent = Intent(activity, ConfirmationActivity::class.java).apply {
             putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION)
@@ -80,7 +79,7 @@ fun MenuScreen(navController: NavController, showDialog: Boolean? = false, usern
             putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
         }
         activity.startActivity(intent)
-        showDialogState = false
+        AppPreferences.isShow = true
     }
 }
 

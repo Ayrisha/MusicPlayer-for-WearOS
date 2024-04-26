@@ -44,14 +44,17 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.example.musicplayer.data.AppPreferences
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 
 private const val CLIENT_ID =
     "550470458277-2dvd7f06dd8npndqtc6o9kt9tcudjofn.apps.googleusercontent.com"
 
-@OptIn(DelicateCoroutinesApi::class)
+
+@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun AuthScreen(
     navController: NavController,
@@ -61,6 +64,7 @@ fun AuthScreen(
     val listState = rememberLazyListState()
     val context = LocalContext.current
     var isSignedIn by remember { mutableStateOf(false) }
+    val scope = CoroutineScope(newSingleThreadContext("name"))
     val googleSignInLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             Log.d("GoogleSignInActivity", "Received Activity Result: ${result.resultCode}")
@@ -69,20 +73,21 @@ fun AuthScreen(
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 try {
                     val account = task.getResult(ApiException::class.java)
-//                    val application = context.applicationContext as MusicApplication
-//                    val musicRepository = application.container.musicPlayerRepository
-//
-//                    GlobalScope.launch{
-//                        musicRepository.sedCode(account.serverAuthCode.toString())
-//                    }
+                    val application = context.applicationContext as MusicApplication
+                    val musicRepository = application.container.musicPlayerRepository
+
+                    scope.launch {
+                        musicRepository.sedCode(account.idToken.toString())
+                    }
 
                     AppPreferences.isLogin = true
+                    AppPreferences.isShow = false
                     isSignedIn = true
 
-                    navController.navigate("menu_screen/$isSignedIn/${account.email}")
+                    navController.navigate("menu_screen/${account.email}")
                     Log.d(
                         "GoogleSignInActivity",
-                        "signInResult:success account=${account.serverAuthCode}"
+                        "signInResult:success account=${account.idToken}"
                     )
                 } catch (e: ApiException) {
                     showDialogState = true
@@ -121,7 +126,7 @@ fun AuthScreen(
             item {
                 Text(
                     modifier = Modifier
-                        .padding(top = 25.dp, start = 25.dp, end = 25.dp, bottom = 10.dp),
+                        .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
                     text = "Зарегестрируйтесь, чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
                     color = Color.White,
                     textAlign = TextAlign.Center
@@ -150,12 +155,13 @@ fun AuthScreen(
 
 fun signInWithGoogle(googleSignInLauncher: ActivityResultLauncher<Intent>, context: Context) {
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(CLIENT_ID)
         .requestServerAuthCode(CLIENT_ID)
         .requestScopes(Scope("openid"))
         .requestEmail()
         .build()
     val signIn = GoogleSignIn.getClient(context, gso)
-    //signIn.signOut()
+    signIn.signOut()
     val signInIntent = signIn.signInIntent
     googleSignInLauncher.launch(signInIntent)
 }

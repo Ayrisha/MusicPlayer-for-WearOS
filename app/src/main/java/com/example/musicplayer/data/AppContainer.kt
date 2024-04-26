@@ -1,6 +1,8 @@
 package com.example.musicplayer.data
 
 import com.example.musicplayer.data.network.MusicService
+import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.media.data.database.dao.MediaDownloadDao
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

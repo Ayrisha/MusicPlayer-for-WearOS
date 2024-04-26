@@ -6,7 +6,6 @@ import androidx.media3.common.util.UnstableApi
 import com.example.musicplayer.data.AppContainer
 import com.example.musicplayer.data.AppPreferences
 import com.example.musicplayer.data.DefaultAppContainer
-import com.example.musicplayer.data.ExoPlayerObject
 
 class MusicApplication: Application() {
     lateinit var container: AppContainer
@@ -14,6 +13,5 @@ class MusicApplication: Application() {
         super.onCreate()
         container = DefaultAppContainer()
         AppPreferences.init(this)
-        ExoPlayerObject.init(this)
     }
 }

@@ -6,4 +6,5 @@
     <string name="title_activity_song_screen">SongScreen</string>
     <string name="title_activity_playlist_screen">PlaylistScreen</string>
     <string name="title_activity_menu_screen">MenuScreen</string>
+    <string name="download">Download</string>
 </resources>

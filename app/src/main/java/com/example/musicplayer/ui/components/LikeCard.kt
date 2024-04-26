@@ -5,10 +5,9 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,26 +16,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.Text
-import com.example.musicplayer.data.Track
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SongCard(
-    list: List<Track>,
-    navController: NavController,
-    id: String?,
-    title: String,
-    artist: String?,
-    img: String?
+fun LikeCard(
 ) {
     Card(
         backgroundPainter = ColorPainter(color = Color(0xFF1C1B1F)),
         modifier = Modifier
-            .fillMaxSize(),
-        onClick = { navController.navigate("play_screen/$id/$title/$artist") }
+            .size(height = 60.dp, width = 170.dp),
+        onClick = {  }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -59,13 +50,13 @@ fun SongCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = title,
+                    text = "title",
                     color = Color.White,
                     fontSize=15.sp)
-                artist?.let { Text(
-                    text = it, Modifier.basicMarquee(),
+                Text(
+                    text = "artist", Modifier.basicMarquee(),
                     color = Color.White.copy(alpha = 0.5f),
-                    fontSize=10.sp) }
+                    fontSize=10.sp)
             }
         }
     }

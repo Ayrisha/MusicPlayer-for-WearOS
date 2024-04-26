@@ -1,18 +1,22 @@
 package com.example.musicplayer
 
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresExtension
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.musicplayer.data.AppPreferences
-import com.example.musicplayer.data.ExoPlayerObject
+import com.example.musicplayer.data.PlaybackService
 import com.example.musicplayer.ui.screens.AuthScreen
 import com.example.musicplayer.ui.screens.LikeScreen
 import com.example.musicplayer.ui.screens.LoadMusicScreen
@@ -20,18 +24,34 @@ import com.example.musicplayer.ui.screens.MenuScreen
 import com.example.musicplayer.ui.screens.PlayScreen
 import com.example.musicplayer.ui.screens.PlaylistScreen
 import com.example.musicplayer.ui.screens.SearchScreen
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 
+@UnstableApi
 class MainActivity : ComponentActivity() {
-    @UnstableApi
+    lateinit var controllerFuture: ListenableFuture<MediaController>
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val context = applicationContext
+        lateinit var mediaController: MediaController
+
+        val sessionToken =
+            SessionToken(context, ComponentName(context, PlaybackService::class.java))
+
+        controllerFuture =
+            MediaController.Builder(context, sessionToken).buildAsync()
+        controllerFuture.addListener({
+            mediaController = controllerFuture.get()
+        }, MoreExecutors.directExecutor())
+
 
         AppPreferences.isLogin = false
+        AppPreferences.isShow = false
 
-        val startScreen: String = if (AppPreferences.isLogin){
+        val startScreen: String = if (AppPreferences.isLogin) {
             "menu_screen"
-        } else{
+        } else {
             "AuthScreen"
         }
 
@@ -49,15 +69,13 @@ class MainActivity : ComponentActivity() {
                     MenuScreen(navController)
                 }
                 composable(
-                    route = "menu_screen/{state}/{name}",
+                    route = "menu_screen/{name}",
                     arguments = listOf(
-                        navArgument("state") { type = NavType.BoolType },
                         navArgument("name") { type = NavType.StringType }
                     )
                 ) {
-                    val state = it.arguments?.getBoolean("state")
                     val name = it.arguments?.getString("name")
-                    MenuScreen(navController, state, name)
+                    MenuScreen(navController, name)
                 }
                 composable("song_search") {
                     SearchScreen(navController)
@@ -72,7 +90,7 @@ class MainActivity : ComponentActivity() {
                     LoadMusicScreen()
                 }
                 composable(
-                    route ="play_screen/{id}/{title}/{artist}",
+                    route = "play_screen/{id}/{title}/{artist}",
                     arguments = listOf(
                         navArgument("id") { type = NavType.StringType },
                         navArgument("title") { type = NavType.StringType },
@@ -82,17 +100,11 @@ class MainActivity : ComponentActivity() {
                     val title = it.arguments?.getString("title")
                     val artist = it.arguments?.getString("artist")
                     if (id != null) {
-                        PlayScreen(id, title, artist)
+                        PlayScreen(mediaController, context, id, title, artist)
                     }
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        ExoPlayerObject.destroy()
     }
 }
 

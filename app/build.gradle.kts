@@ -65,7 +65,6 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.wear.compose:compose-material:1.2.1")
     implementation("androidx.wear.compose:compose-foundation:1.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -75,7 +74,7 @@ dependencies {
     implementation ("com.google.android.horologist:horologist-media-ui:0.5.4")
     implementation ("com.google.android.horologist:horologist-media-data:0.5.4")
     implementation ("com.google.android.horologist:horologist-audio-ui:0.5.4")
-    implementation("androidx.media3:media3-exoplayer:1.2.0")
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.material3:material3")
@@ -107,6 +106,7 @@ dependencies {
     implementation("androidx.wear:wear-remote-interactions:1.0.0")
     implementation("io.appwrite:sdk-for-android:5.0.0")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.media3:media3-session:1.3.1")
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
