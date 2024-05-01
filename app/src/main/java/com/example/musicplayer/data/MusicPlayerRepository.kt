@@ -1,12 +1,14 @@
 package com.example.musicplayer.data
 
 import com.example.musicplayer.data.network.MusicService
+import com.example.musicplayer.data.network.model.OAuth
 
 interface MusicPlayerRepository {
     suspend fun searchTrack(title: String): List<Track>
     suspend fun popularTrack(): List<Track>
     suspend fun newTrack(): List<Track>
     suspend fun sedCode(code: String)
+    suspend fun oauth(user:String)
 }
 
 class NetworkMusicPlayerRepository(
@@ -43,5 +45,9 @@ class NetworkMusicPlayerRepository(
 
     override suspend fun sedCode(code: String) {
         musicService.sendCode(code)
+    }
+
+    override suspend fun oauth(user: String) {
+        musicService.oauth(user)
     }
 }

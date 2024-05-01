@@ -1,22 +1,27 @@
 package com.example.musicplayer.data.auth
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import android.credentials.GetCredentialException
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
+import com.google.android.gms.auth.api.identity.BeginSignInRequest.PasswordRequestOptions
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -27,41 +32,39 @@ import java.util.UUID
 
 private const val TAG = "AuthGoogleViewModel"
 private const val CLIENT_ID =
-    "550470458277-hgcg4jt8lstgt9g7kc7j1b6iiavsur77.apps.googleusercontent.com"
+    "550470458277-2dvd7f06dd8npndqtc6o9kt9tcudjofn.apps.googleusercontent.com"
 
 class AuthGoogleViewModel(application: Application) : AndroidViewModel(application) {
-
+    @SuppressLint("SuspiciousIndentation")
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun startAuthFlow(context: Context) {
+        val credentialManager = CredentialManager.create(context)
+
+        val rowNonce = UUID.randomUUID().toString()
+        val bytes = rowNonce.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        val hashedNonce = digest.fold(""){ _, it -> "%02x".format(it)}
+
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId(CLIENT_ID)
+            .build()
+
+        val request: GetCredentialRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
         viewModelScope.launch {
-            val credentialManager = CredentialManager.create(context)
-
-            val rowNonce = UUID.randomUUID().toString()
-            val bytes = rowNonce.toByteArray()
-            val md = MessageDigest.getInstance("SHA-256")
-            val digest = md.digest(bytes)
-            val hashedNonce = digest.fold(""){ _, it -> "%02x".format(it)}
-
-            val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(CLIENT_ID)
-                .setNonce(hashedNonce)
-                .build()
-
-            val request: GetCredentialRequest = GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 try {
                     val result = credentialManager.getCredential(
                         request = request,
                         context = context,
                     )
                     handleSignIn(result)
-                } catch (e: GetCredentialException) {
-                    Log.d(TAG, "Get Credential Exception")
+                } catch (e: NoCredentialException) {
+                    Log.e("CredentialManager", "No credential available", e)
                 }
-            }
         }
     }
 

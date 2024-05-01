@@ -3,13 +3,14 @@ package com.example.musicplayer.ui.screens
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.wear.compose.material.Card
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,37 +36,43 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.activity.ConfirmationActivity
+import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import com.example.musicplayer.MusicApplication
+import com.example.musicplayer.data.auth.AuthGoogleViewModel
+import com.example.musicplayer.data.datastore.DataStoreManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
-import com.example.musicplayer.data.AppPreferences
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
+import okhttp3.internal.wait
+
 
 private const val CLIENT_ID =
     "550470458277-2dvd7f06dd8npndqtc6o9kt9tcudjofn.apps.googleusercontent.com"
 
 
-@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+
+@OptIn(DelicateCoroutinesApi::class)
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun AuthScreen(
     navController: NavController,
     screen: String
 ) {
+
     var showDialogState by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
-    var isSignedIn by remember { mutableStateOf(false) }
-    val scope = CoroutineScope(newSingleThreadContext("name"))
+    val coroutineScope = rememberCoroutineScope()
+    val viewModel: AuthGoogleViewModel = viewModel(factory = AuthGoogleViewModel.Factory)
     val googleSignInLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             Log.d("GoogleSignInActivity", "Received Activity Result: ${result.resultCode}")
@@ -76,19 +84,24 @@ fun AuthScreen(
                     val application = context.applicationContext as MusicApplication
                     val musicRepository = application.container.musicPlayerRepository
 
-                    scope.launch {
-                        musicRepository.sedCode(account.idToken.toString())
+                    GlobalScope.launch {
+                        DataStoreManager.getInstance().updateIsCompleted(true)
+                        DataStoreManager.getInstance().isCompleted.collect { isCompleted ->
+                            if (isCompleted) {
+                                Log.d("DataAuth", "True")
+                            } else {
+                                Log.d("DataAuth", "False")
+                            }
+                        }
+                        DataStoreManager.getInstance().updateIsShow(false)
+                        //musicRepository.sedCode(account.idToken.toString())
                     }
 
-                    AppPreferences.isLogin = true
-                    AppPreferences.isShow = false
-                    isSignedIn = true
-
-                    navController.navigate("menu_screen/${account.email}")
                     Log.d(
                         "GoogleSignInActivity",
-                        "signInResult:success account=${account.idToken}"
+                        "signInResult:success account=${account.serverAuthCode}"
                     )
+                    navController.navigate("menu_screen/${account.email}")
                 } catch (e: ApiException) {
                     showDialogState = true
                     Log.w("GoogleSignInActivity", "signInResult:failed code=${e.statusCode}")
@@ -136,7 +149,10 @@ fun AuthScreen(
                 CardSigIn(
                     imageVector = Icons.Rounded.AccountCircle,
                     text = "Войти через Google",
-                    onClick = { signInWithGoogle(googleSignInLauncher, context) },
+                    onClick = {
+                              //viewModel.startAuthFlow(context)
+                              signInWithGoogle(googleSignInLauncher, context)
+                              },
                     backgroundPainter = ColorPainter(Color(48, 79, 254))
                 )
             }
@@ -157,7 +173,7 @@ fun signInWithGoogle(googleSignInLauncher: ActivityResultLauncher<Intent>, conte
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestIdToken(CLIENT_ID)
         .requestServerAuthCode(CLIENT_ID)
-        .requestScopes(Scope("openid"))
+        .requestScopes(Scope("openid"), Scope("email"), Scope("profile"))
         .requestEmail()
         .build()
     val signIn = GoogleSignIn.getClient(context, gso)

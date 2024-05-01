@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -30,15 +31,15 @@ import com.google.android.horologist.media.ui.screens.player.PlayerScreen
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun PlayScreen(
+fun  PlayScreen(
     controller: MediaController,
-    context: Context,
     id: String,
     title: String? = "No name",
     artist: String? = "No name"
 ) {
     var likeState by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val playerViewModel = PlayerViewModel(controller)
     val volumeViewModel = createVolumeViewModel(context)
     playerViewModel.setTrack(id, title.toString(), artist.toString())

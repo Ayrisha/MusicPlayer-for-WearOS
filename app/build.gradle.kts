@@ -97,12 +97,15 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.wear:wear-phone-interactions:1.0.1")
 
+    // Preferences DataStore (SharedPreferences like APIs)
+    implementation("androidx.datastore:datastore-preferences:1.1.0")
+
     // Auth
     implementation ("com.google.android.libraries.identity.googleid:googleid:1.1.0")
     implementation ("androidx.credentials:credentials:1.2.2")
     implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.gms:google-services:4.4.1")
-    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.1.0")
     implementation("androidx.wear:wear-remote-interactions:1.0.0")
     implementation("io.appwrite:sdk-for-android:5.0.0")
     implementation("androidx.room:room-ktx:2.6.1")
