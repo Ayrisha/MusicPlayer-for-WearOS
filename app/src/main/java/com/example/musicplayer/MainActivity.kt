@@ -39,7 +39,7 @@ import okhttp3.internal.wait
 
 @UnstableApi
 class MainActivity : ComponentActivity() {
-    lateinit var controllerFuture: ListenableFuture<MediaController>
+    private lateinit var controllerFuture: ListenableFuture<MediaController>
     @SuppressLint("CoroutineCreationDuringComposition")
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)

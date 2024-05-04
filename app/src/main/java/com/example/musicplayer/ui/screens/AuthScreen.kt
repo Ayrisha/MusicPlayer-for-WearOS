@@ -10,6 +10,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,12 +37,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.NoCredentialException
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.activity.ConfirmationActivity
 import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
+import androidx.wear.widget.BoxInsetLayout
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.auth.AuthGoogleViewModel
 import com.example.musicplayer.data.datastore.DataStoreManager
@@ -49,10 +55,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.internal.wait
+import java.security.MessageDigest
+import java.util.UUID
 
 
 private const val CLIENT_ID =
@@ -131,41 +140,42 @@ fun AuthScreen(
             PositionIndicator(lazyListState = listState)
         }
     ) {
-        LazyColumn(
-            state = listState,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement =  Arrangement.spacedBy(5.dp)
-        ) {
-            item {
-                Text(
-                    modifier = Modifier
-                        .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
-                    text = "Зарегестрируйтесь, чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
+
+            LazyColumn(
+                state = listState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                item {
+                    Text(
+                        modifier = Modifier
+                            .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
+                        text = "Зарегестрируйтесь,\n чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                item {
+                    CardSigIn(
+                        imageVector = Icons.Rounded.AccountCircle,
+                        text = "Войти через Google",
+                        onClick = {
+                            viewModel.startAuthFlow(context)
+                            //signInWithGoogle(googleSignInLauncher, context)
+                        },
+                        backgroundPainter = ColorPainter(Color(48, 79, 254))
+                    )
+                }
+                item {
+                    CardSigIn(
+                        imageVector = Icons.Rounded.Clear,
+                        text = "Продолжить без аккаунта",
+                        onClick = { navController.navigate(screen) },
+                        backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
+                        padding = 20.dp
+                    )
+                }
             }
-            item {
-                CardSigIn(
-                    imageVector = Icons.Rounded.AccountCircle,
-                    text = "Войти через Google",
-                    onClick = {
-                              //viewModel.startAuthFlow(context)
-                              signInWithGoogle(googleSignInLauncher, context)
-                              },
-                    backgroundPainter = ColorPainter(Color(48, 79, 254))
-                )
-            }
-            item {
-                CardSigIn(
-                    imageVector = Icons.Rounded.Clear,
-                    text = "Продолжить без аккаунта",
-                    onClick = { navController.navigate(screen) },
-                    backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
-                    padding = 20.dp
-                )
-            }
-        }
     }
 }
 

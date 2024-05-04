@@ -21,8 +21,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
-import com.google.android.gms.auth.api.identity.BeginSignInRequest.PasswordRequestOptions
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.launch
@@ -48,6 +48,7 @@ class AuthGoogleViewModel(application: Application) : AndroidViewModel(applicati
 
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(true)
+            .setAutoSelectEnabled(false)
             .setServerClientId(CLIENT_ID)
             .build()
 
@@ -86,7 +87,7 @@ class AuthGoogleViewModel(application: Application) : AndroidViewModel(applicati
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential
                             .createFrom(credential.data)
-                        Log.e(TAG, "googleIdTokenCredential")
+                        Log.e(TAG, "googleIdTokenCredential $googleIdTokenCredential")
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Received an invalid google id token response", e)
                     }

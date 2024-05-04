@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
+        google()
     }
 }
 
@@ -58,7 +59,6 @@ dependencies {
     implementation ("androidx.wear.compose:compose-navigation:1.2.1")
 
     implementation("androidx.core:core-ktx:1.12.0")
-    implementation("com.google.android.gms:play-services-wearable:18.1.0")
     implementation("androidx.percentlayout:percentlayout:1.0.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
@@ -69,6 +69,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation ("androidx.fragment:fragment-ktx:1.6.2")
+    implementation ("com.google.android.horologist:horologist-compose-layout:0.5.4")
 
     // https://mavenlibs.com/maven/dependency/com.google.android.horologist/horologist-media-ui
     implementation ("com.google.android.horologist:horologist-media-ui:0.5.4")
@@ -105,10 +106,11 @@ dependencies {
     implementation ("androidx.credentials:credentials:1.2.2")
     implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.gms:google-services:4.4.1")
-    implementation("com.google.android.gms:play-services-auth:21.1.0")
+    implementation("com.google.android.gms:play-services-auth:21.1.1")
     implementation("androidx.wear:wear-remote-interactions:1.0.0")
     implementation("io.appwrite:sdk-for-android:5.0.0")
     implementation("androidx.room:room-ktx:2.6.1")
+
     implementation("androidx.media3:media3-session:1.3.1")
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {

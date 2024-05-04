@@ -30,10 +30,12 @@ import com.example.musicplayer.data.datastore.AuthStatus
 import com.example.musicplayer.data.datastore.DataStoreManager
 import com.example.musicplayer.data.datastore.MyDataStore
 import com.example.musicplayer.ui.components.MenuItem
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.internal.wait
 
+@OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MenuScreen(navController: NavController, username: String? = "") {
