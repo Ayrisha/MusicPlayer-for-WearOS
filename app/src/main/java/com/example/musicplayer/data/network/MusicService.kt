@@ -1,8 +1,10 @@
 package com.example.musicplayer.data.network;
 
 import com.example.musicplayer.data.network.model.TrackInfo
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 
@@ -29,4 +31,23 @@ interface MusicService {
     suspend fun oauth(
         @Header("User") user: String
     )
+
+    @POST("/hse/api/v1/music-player-dictionary/likes/like")
+    suspend fun setTrackLike(
+        @Query("trackId") trackId: String
+    )
+
+    @DELETE("/hse/api/v1/music-player-dictionary/likes/like")
+    suspend fun deleteTrackLike(
+        @Query("trackId") trackId: String
+    )
+
+    @GET("/hse/api/v1/music-player-dictionary/likes/check")
+    suspend fun checkTrackLike(
+        @Query("trackId") trackId: String
+    )
+
+    @GET("/hse/api/v1/music-player-dictionary/likes")
+    suspend fun getTracksLike(
+    ):List<TrackInfo>
 }

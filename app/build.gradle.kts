@@ -95,7 +95,7 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.wear:wear-phone-interactions:1.0.1")
 
     // Preferences DataStore (SharedPreferences like APIs)
@@ -103,15 +103,13 @@ dependencies {
 
     // Auth
     implementation ("com.google.android.libraries.identity.googleid:googleid:1.1.0")
-    implementation ("androidx.credentials:credentials:1.2.2")
-    implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0-alpha03")
+    implementation("androidx.credentials:credentials:1.3.0-alpha03")
     implementation("com.google.gms:google-services:4.4.1")
     implementation("com.google.android.gms:play-services-auth:21.1.1")
-    implementation("androidx.wear:wear-remote-interactions:1.0.0")
-    implementation("io.appwrite:sdk-for-android:5.0.0")
-    implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("androidx.media3:media3-session:1.3.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")

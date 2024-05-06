@@ -50,5 +50,9 @@ class PlayerViewModel(
             playerRepository.setMediaList(mediaList, index)
         }
     }
+
+    fun setLike(idMedia: String){
+
+    }
 }
 

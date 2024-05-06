@@ -92,10 +92,10 @@ class MainActivity : ComponentActivity() {
                     MenuScreen(navController, name)
                 }
                 composable("song_search") {
-                    SearchScreen(navController)
+                    SearchScreen(mediaController, navController)
                 }
                 composable("like_music") {
-                    LikeScreen()
+                    LikeScreen(mediaController, navController)
                 }
                 composable("playlists") {
                     PlaylistScreen()

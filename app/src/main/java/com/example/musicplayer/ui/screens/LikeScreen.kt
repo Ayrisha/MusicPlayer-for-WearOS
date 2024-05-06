@@ -1,98 +1,95 @@
 package com.example.musicplayer.ui.screens
 
-import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
-import androidx.wear.compose.foundation.rememberRevealState
-import androidx.wear.compose.material.ExperimentalWearMaterialApi
-import androidx.wear.compose.material.Icon
-import androidx.wear.compose.material.SwipeToRevealAction
-import androidx.wear.compose.material.SwipeToRevealCard
-import androidx.wear.compose.material.SwipeToRevealDefaults
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.edgeSwipeToDismiss
-import androidx.wear.compose.material.rememberSwipeToDismissBoxState
-import com.example.musicplayer.ui.components.LikeCard
-import com.example.musicplayer.ui.components.PlayListChip
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.session.MediaController
+import androidx.navigation.NavController
+import androidx.wear.compose.material.PositionIndicator
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.Vignette
+import androidx.wear.compose.material.VignettePosition
+import com.example.musicplayer.ui.components.EmptyBox
+import com.example.musicplayer.ui.components.Loading
+import com.example.musicplayer.ui.components.Retry
+import com.example.musicplayer.ui.components.SongCard
+import com.example.musicplayer.ui.viewModel.LikeUiState
+import com.example.musicplayer.ui.viewModel.LikeViewModel
 
-@SuppressLint("RememberReturnType")
-@OptIn(ExperimentalWearMaterialApi::class, ExperimentalWearFoundationApi::class)
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun LikeScreen() {
-    Box(
-        modifier = Modifier.padding(
-            top = 30.dp,
-            start = 10.dp,
-            end = 10.dp,
-            bottom = 30.dp
-        )
+fun LikeScreen(
+    mediaController: MediaController,
+    navController: NavController
+) {
+    val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
+
+    val songUiState = likeViewModel.likeUiState
+
+    val listState = rememberLazyListState()
+
+    likeViewModel.getTracksLike()
+
+    Scaffold(
+        vignette = {
+            Vignette(vignettePosition = VignettePosition.Bottom)
+        },
+        positionIndicator = {
+            PositionIndicator(lazyListState = listState)
+        }
     ) {
-        val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
-        val revealState = rememberRevealState()
-        val interactionSource = remember { MutableInteractionSource() }
-        var undoVisible by remember { mutableStateOf(false) }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            SwipeToRevealCard(
-                revealState = revealState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .edgeSwipeToDismiss(swipeToDismissBoxState),
-                action = SwipeToRevealAction(
-                    icon = {
-                        Icon(SwipeToRevealDefaults.Delete, "Delete")
-                    },
-                    label = {
-                        Text("Delete")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    interactionSource = interactionSource,
-                    onClick = {
-                        undoVisible = true
-                    }
-                ),
-                undoAction =
-                SwipeToRevealAction(
-                    icon = {},
-                    label = {
-                        Text("Undo")
-                    },
+        when (songUiState) {
+            is LikeUiState.Success ->
+                LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    interactionSource = interactionSource,
-                    onClick = {
-                        undoVisible = false
-                    }
-                ),
-            ) {
-                if (undoVisible) {
-                    LaunchedEffect(Unit) {
-                        delay(3000)
-                        Log.w("LikeScreen", "Delete")
-                        undoVisible = false
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    state = listState,
+                    contentPadding = PaddingValues(
+                        top = 30.dp,
+                        start = 10.dp,
+                        end = 10.dp,
+                        bottom = 10.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    itemsIndexed(songUiState.tracksLike) { index, item ->
+                        SongCard(
+                            index = index,
+                            mediaController = mediaController,
+                            list = songUiState.tracksLike,
+                            navController = navController,
+                            id = item.id,
+                            title = item.title,
+                            artist = item.artist,
+                            img = item.imgLink
+                        )
                     }
                 }
-                LikeCard()
+
+            is LikeUiState.Empty -> {
+                EmptyBox("Нет избранных")
             }
-            PlayListChip()
+
+            is LikeUiState.Loading -> {
+                Loading()
+            }
+
+            is LikeUiState.Error -> {
+                Retry(
+                    retryAction = {
+                        likeViewModel.getTracksLike()
+                    })
+            }
         }
     }
 }

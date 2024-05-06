@@ -16,8 +16,11 @@ class DefaultAppContainer : AppContainer{
 
     private val BASE_URL = "http://45.15.158.128:8080"
 
-    private val logging : HttpLoggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-    private val httpClient : OkHttpClient.Builder = OkHttpClient.Builder().addInterceptor(logging)
+    private val logging : HttpLoggingInterceptor = HttpLoggingInterceptor()
+        .setLevel(HttpLoggingInterceptor.Level.BODY)
+    private val httpClient : OkHttpClient.Builder = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .addInterceptor(BasicAuthInterceptor("andrey.malygin2002@gmail.com", "123"))
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())

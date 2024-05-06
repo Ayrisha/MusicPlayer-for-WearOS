@@ -9,6 +9,11 @@ interface MusicPlayerRepository {
     suspend fun newTrack(): List<Track>
     suspend fun sedCode(code: String)
     suspend fun oauth(user:String)
+    suspend fun getTracksLike(): List<Track>
+    suspend fun setTrackLike(trackId: String)
+    suspend fun deleteTrackLike(trackId: String)
+
+    suspend fun checkTrackLike(trackId: String)
 }
 
 class NetworkMusicPlayerRepository(
@@ -49,5 +54,26 @@ class NetworkMusicPlayerRepository(
 
     override suspend fun oauth(user: String) {
         musicService.oauth(user)
+    }
+
+    override suspend fun getTracksLike(): List<Track> = musicService.getTracksLike().map { items ->
+        Track(
+            id = items.id,
+            title = items.trackTitle,
+            artist = items.artist,
+            imgLink = items.trackCoverId
+        )
+    }
+
+    override suspend fun setTrackLike(trackId: String) {
+        musicService.setTrackLike(trackId)
+    }
+
+    override suspend fun deleteTrackLike(trackId: String) {
+        musicService.deleteTrackLike(trackId)
+    }
+
+    override suspend fun checkTrackLike(trackId: String) {
+        musicService.checkTrackLike(trackId)
     }
 }

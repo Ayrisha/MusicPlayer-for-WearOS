@@ -13,15 +13,16 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Text
 
 @Composable
-fun EmptyBox(){
+fun EmptyBox(
+    text: String
+){
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 20.dp),
-        contentAlignment = Alignment.TopCenter
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "По вашему запросу ничего не найдено",
+            text = text,
             modifier = Modifier.width(150.dp),
             textAlign = TextAlign.Center,
             color = Color.Gray

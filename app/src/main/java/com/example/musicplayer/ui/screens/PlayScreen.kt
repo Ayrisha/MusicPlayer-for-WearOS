@@ -18,9 +18,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.example.musicplayer.R
+import com.example.musicplayer.ui.viewModel.LikeViewModel
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.audio.SystemAudioRepository
@@ -37,19 +40,22 @@ fun  PlayScreen(
     title: String? = "No name",
     artist: String? = "No name"
 ) {
-    var likeState by remember { mutableStateOf(false) }
+    val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
+
+    var likeState by remember { mutableStateOf(likeViewModel.checkLike(controller.currentMediaItem?.mediaId.toString())) }
 
     val context = LocalContext.current
     val playerViewModel = PlayerViewModel(controller)
     val volumeViewModel = createVolumeViewModel(context)
-    playerViewModel.setTrack(id, title.toString(), artist.toString())
+    //playerViewModel.setTrack(id, title.toString(), artist.toString())
 
     PlayerScreen(
         playerViewModel = playerViewModel,
         volumeViewModel = volumeViewModel,
         buttons = {
             IconButton(
-                onClick = { }) {
+                onClick = {
+                }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_download_24),
                     tint = Color.White,
@@ -57,7 +63,15 @@ fun  PlayScreen(
                 )
             }
             IconButton(
-                onClick = { likeState = !likeState }) {
+                onClick = {
+                    if (!likeState){
+                        likeViewModel.setLike(controller.currentMediaItem?.mediaId.toString())
+                    }
+                    else{
+                        likeViewModel.deleteLike(controller.currentMediaItem?.mediaId.toString())
+                    }
+                    likeState = !likeState
+                }) {
                 if (likeState) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
