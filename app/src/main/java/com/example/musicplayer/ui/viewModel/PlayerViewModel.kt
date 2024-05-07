@@ -1,58 +1,95 @@
 package com.example.musicplayer.ui.viewModel
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
-import com.example.musicplayer.data.Track
+import com.example.musicplayer.MusicApplication
+import com.example.musicplayer.data.DefaultAppContainer
+import com.example.musicplayer.data.MusicPlayerRepository
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.media.data.repository.PlayerRepositoryImpl
-import com.google.android.horologist.media.model.Media
 import com.google.android.horologist.media.ui.state.PlayerViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+sealed interface LikeState{
+    object Like : LikeState
+    object Dislike : LikeState
+}
 
 @UnstableApi
 @OptIn(ExperimentalHorologistApi::class)
 class PlayerViewModel(
     private val player: MediaController,
-    private val playerRepository: PlayerRepositoryImpl = PlayerRepositoryImpl()
+    private val playerRepository: PlayerRepositoryImpl = PlayerRepositoryImpl(),
+    private val musicPlayerRepository: MusicPlayerRepository = DefaultAppContainer().musicPlayerRepository
 ) : PlayerViewModel(playerRepository) {
+
+    var likeState: LikeState by mutableStateOf(LikeState.Dislike)
+
     init {
         viewModelScope.launch {
             playerRepository.connect(player) {}
-        }
-    }
 
-    fun setTrack(id: String, title: String, artist: String) {
-        viewModelScope.launch {
-            if (playerRepository.currentMedia.value == null || playerRepository.currentMedia.value!!.id != id) {
-                playerRepository.setMedia(
-                    Media(
-                        id = id,
-                        uri = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/$id.mp3",
-                        title = title,
-                        artist = artist
-                    )
-                )
-            }
-        }
-    }
+            player.currentMediaItem?.mediaId?.let { checkTrack(it) }
 
-    fun setTrackList(idList: List<String>, index: Int) {
-        val mediaList = idList.map { id ->
-            Media(
-                id = id,
-                title = "Title",
-                artist = "Artist",
-                uri = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/$id.mp3"
+            player.addListener(
+                object: Player.Listener {
+                    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                        super.onMediaItemTransition(mediaItem, reason)
+
+                        val newMediaItem = mediaItem?.mediaId
+                        newMediaItem?.let { checkTrack(it) }
+                    }
+                }
             )
-        }
-        viewModelScope.launch {
-            playerRepository.setMediaList(mediaList, index)
         }
     }
 
     fun setLike(idMedia: String){
+        viewModelScope.launch {
+            musicPlayerRepository.setTrackLike(idMedia)
+            checkTrack(idMedia)
+        }
+    }
 
+    fun deleteLike(idMedia: String){
+        viewModelScope.launch {
+            musicPlayerRepository.deleteTrackLike(idMedia)
+            checkTrack(idMedia)
+        }
+    }
+
+    private suspend fun checkLikeResponse(idMedia: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                musicPlayerRepository.checkTrackLike(idMedia)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+
+    fun checkTrack(idMedia: String) {
+        viewModelScope.launch {
+            val result = checkLikeResponse(idMedia)
+            likeState = if (result) {
+                LikeState.Like
+            } else {
+                LikeState.Dislike
+            }
+        }
     }
 }
 

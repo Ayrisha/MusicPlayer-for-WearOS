@@ -16,7 +16,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
-import com.example.musicplayer.data.Track
+import com.example.musicplayer.data.model.Track
 import kotlinx.coroutines.launch
 import java.io.IOException
 

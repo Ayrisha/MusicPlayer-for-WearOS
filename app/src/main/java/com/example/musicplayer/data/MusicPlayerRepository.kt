@@ -1,7 +1,8 @@
 package com.example.musicplayer.data
 
+import com.example.musicplayer.data.model.PlayList
+import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.data.network.MusicService
-import com.example.musicplayer.data.network.model.OAuth
 
 interface MusicPlayerRepository {
     suspend fun searchTrack(title: String): List<Track>
@@ -12,8 +13,9 @@ interface MusicPlayerRepository {
     suspend fun getTracksLike(): List<Track>
     suspend fun setTrackLike(trackId: String)
     suspend fun deleteTrackLike(trackId: String)
-
     suspend fun checkTrackLike(trackId: String)
+    suspend fun setPlayList(title: String)
+    suspend fun getPlayList(): List<PlayList>
 }
 
 class NetworkMusicPlayerRepository(
@@ -75,5 +77,15 @@ class NetworkMusicPlayerRepository(
 
     override suspend fun checkTrackLike(trackId: String) {
         musicService.checkTrackLike(trackId)
+    }
+
+    override suspend fun setPlayList(title: String) {
+        musicService.setPlayList(title)
+    }
+
+    override suspend fun getPlayList(): List<PlayList> = musicService.getPlayList().map { items ->
+        PlayList(
+            title = items.trackTitle
+        )
     }
 }

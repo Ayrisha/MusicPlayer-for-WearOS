@@ -2,9 +2,12 @@ package com.example.musicplayer.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresExtension
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,6 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,71 +62,73 @@ fun SearchScreen(
             PositionIndicator(lazyListState = listState)
         }
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            state = listState,
-            contentPadding = PaddingValues(
-                top = 30.dp,
-                start = 10.dp,
-                end = 10.dp,
-                bottom = 10.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            item {
-                SearchBar(
-                    text = searchTextState.value,
-                    onTextChange = {
-                        trackViewModel.updateSearchTextState(it)
-                    },
-                    onSearchClicked = {
-                        trackViewModel.searchTrack(it)
-                    },
-                    keyboardController = keyboardController
-                )
-            }
-            when (songUiState) {
-                is TrackUiState.Start ->
-                    itemsIndexed(songUiState.trackPopular) {index, item ->
-                        SongCard(
-                            index = index,
-                            mediaController = mediaController,
-                            list = songUiState.trackPopular,
-                            navController = navController,
-                            id = item.id,
-                            title = item.title,
-                            artist = item.artist,
-                            img = item.imgLink
-                        )
-                    }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                state = listState,
+                contentPadding = PaddingValues(
+                    top = 30.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    bottom = 10.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                item {
+                    SearchBar(
+                        text = searchTextState.value,
+                        onTextChange = {
+                            trackViewModel.updateSearchTextState(it)
+                        },
+                        onSearchClicked = {
+                            trackViewModel.searchTrack(it)
+                        },
+                        keyboardController = keyboardController
+                    )
+                }
+                when (songUiState) {
+                    is TrackUiState.Start ->
+                        itemsIndexed(songUiState.trackPopular) { index, item ->
+                            SongCard(
+                                index = index,
+                                mediaController = mediaController,
+                                list = songUiState.trackPopular,
+                                navController = navController,
+                                id = item.id,
+                                title = item.title,
+                                artist = item.artist,
+                                img = item.imgLink
+                            )
+                        }
 
-                is TrackUiState.Success ->
-                    itemsIndexed(songUiState.trackSearches) {index, item ->
-                        SongCard(
-                            index = index,
-                            mediaController = mediaController,
-                            list = songUiState.trackSearches,
-                            navController = navController,
-                            id = item.id,
-                            title = item.title,
-                            artist = item.artist,
-                            img = item.imgLink
-                        )
-                    }
+                    is TrackUiState.Success ->
+                        itemsIndexed(songUiState.trackSearches) { index, item ->
+                            SongCard(
+                                index = index,
+                                mediaController = mediaController,
+                                list = songUiState.trackSearches,
+                                navController = navController,
+                                id = item.id,
+                                title = item.title,
+                                artist = item.artist,
+                                img = item.imgLink
+                            )
+                        }
 
-                is TrackUiState.Empty -> item { EmptyBox("По вашему запросу ничего не найдено") }
-                is TrackUiState.Loading -> item { Loading() }
-                is TrackUiState.Error ->
-                    item {
-                        Retry(
-                            retryAction = {
-                                trackViewModel.searchTrack(
-                                    searchTextState.value
-                                )
-                            })
+                    is TrackUiState.Empty -> item {
+                            EmptyBox("По вашему запросу ничего не найдено")
                     }
+                    is TrackUiState.Loading -> item { Loading() }
+                    is TrackUiState.Error ->
+                        item {
+                            Retry(
+                                retryAction = {
+                                    trackViewModel.searchTrack(
+                                        searchTextState.value
+                                    )
+                                })
+                        }
+                }
             }
-        }
     }
 }

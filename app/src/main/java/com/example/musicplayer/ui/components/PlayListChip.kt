@@ -17,7 +17,9 @@ import androidx.wear.compose.material.ChipDefaults
 import com.example.musicplayer.R
 
 @Composable
-fun PlayListChip() {
+fun PlayListChip(
+    text: String
+) {
     Chip(
         modifier = Modifier.fillMaxWidth().height(35.dp),
         onClick = {},
@@ -36,7 +38,7 @@ fun PlayListChip() {
         border = ChipDefaults.chipBorder(),
     ){
         Text(
-            text = "Summer Mix",
+            text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = Color.White

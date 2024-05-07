@@ -13,10 +13,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
-import com.example.musicplayer.data.Track
+import com.example.musicplayer.data.model.Track
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.util.concurrent.Executor
 
 sealed interface LikeUiState{
     data class Success(val tracksLike: List<Track>) : LikeUiState
@@ -47,31 +46,6 @@ class LikeViewModel (
                 LikeUiState.Error
             }
         }
-    }
-
-    fun setLike(idMedia: String){
-        viewModelScope.launch {
-            musicPlayerRepository.setTrackLike(idMedia)
-        }
-    }
-
-    fun deleteLike(idMedia: String){
-        viewModelScope.launch {
-            musicPlayerRepository.deleteTrackLike(idMedia)
-        }
-    }
-
-    fun checkLike(idMedia: String):Boolean{
-        var check: Boolean = false
-        viewModelScope.launch {
-            try{
-                musicPlayerRepository.checkTrackLike(idMedia)
-                check = true
-            }catch (e: Exception){
-                check = false
-            }
-        }
-        return check
     }
 
     companion object{

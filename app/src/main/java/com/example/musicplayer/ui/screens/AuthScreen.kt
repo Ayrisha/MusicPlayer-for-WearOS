@@ -51,6 +51,7 @@ import androidx.wear.widget.BoxInsetLayout
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.auth.AuthGoogleViewModel
 import com.example.musicplayer.data.datastore.DataStoreManager
+import com.example.musicplayer.ui.components.CardSigIn
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -66,7 +67,6 @@ import java.util.UUID
 
 private const val CLIENT_ID =
     "550470458277-2dvd7f06dd8npndqtc6o9kt9tcudjofn.apps.googleusercontent.com"
-
 
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -110,7 +110,11 @@ fun AuthScreen(
                         "GoogleSignInActivity",
                         "signInResult:success account=${account.serverAuthCode}"
                     )
-                    navController.navigate("menu_screen/${account.email}")
+                    navController.navigate("menu/${account.email}") {
+                        popUpTo("auth") {
+                            inclusive = true
+                        }
+                    }
                 } catch (e: ApiException) {
                     showDialogState = true
                     Log.w("GoogleSignInActivity", "signInResult:failed code=${e.statusCode}")
@@ -127,7 +131,10 @@ fun AuthScreen(
     if (showDialogState) {
         val activity = LocalContext.current as Activity
         val intent = Intent(activity, ConfirmationActivity::class.java).apply {
-            putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.FAILURE_ANIMATION)
+            putExtra(
+                ConfirmationActivity.EXTRA_ANIMATION_TYPE,
+                ConfirmationActivity.FAILURE_ANIMATION
+            )
             putExtra(ConfirmationActivity.EXTRA_MESSAGE, "Не удалось выполнить вход")
             putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
         }
@@ -141,41 +148,47 @@ fun AuthScreen(
         }
     ) {
 
-            LazyColumn(
-                state = listState,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                item {
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
-                        text = "Зарегестрируйтесь,\n чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                item {
-                    CardSigIn(
-                        imageVector = Icons.Rounded.AccountCircle,
-                        text = "Войти через Google",
-                        onClick = {
-                            viewModel.startAuthFlow(context)
-                            //signInWithGoogle(googleSignInLauncher, context)
-                        },
-                        backgroundPainter = ColorPainter(Color(48, 79, 254))
-                    )
-                }
-                item {
-                    CardSigIn(
-                        imageVector = Icons.Rounded.Clear,
-                        text = "Продолжить без аккаунта",
-                        onClick = { navController.navigate(screen) },
-                        backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
-                        padding = 20.dp
-                    )
-                }
+        LazyColumn(
+            state = listState,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            item {
+                Text(
+                    modifier = Modifier
+                        .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
+                    text = "Зарегестрируйтесь,\n чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
             }
+            item {
+                CardSigIn(
+                    imageVector = Icons.Rounded.AccountCircle,
+                    text = "Войти через Google",
+                    onClick = {
+                        //viewModel.startAuthFlow(context)
+                        signInWithGoogle(googleSignInLauncher, context)
+                    },
+                    backgroundPainter = ColorPainter(Color(48, 79, 254))
+                )
+            }
+            item {
+                CardSigIn(
+                    imageVector = Icons.Rounded.Clear,
+                    text = "Продолжить без аккаунта",
+                    onClick = {
+                        navController.navigate("menu") {
+                            popUpTo("auth") {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
+                    padding = 20.dp
+                )
+            }
+        }
     }
 }
 
@@ -190,37 +203,5 @@ fun signInWithGoogle(googleSignInLauncher: ActivityResultLauncher<Intent>, conte
     signIn.signOut()
     val signInIntent = signIn.signInIntent
     googleSignInLauncher.launch(signInIntent)
-}
-
-@Composable
-fun CardSigIn(
-    imageVector: ImageVector,
-    text: String,
-    onClick: () -> Unit,
-    backgroundPainter: ColorPainter,
-    padding: Dp = 0.dp) {
-    Card(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 20.dp, end = 20.dp, bottom = padding),
-        onClick = onClick,
-        backgroundPainter = backgroundPainter,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = "icon",
-                tint = Color.White
-            )
-            Text(
-                text = text,
-                fontSize = 15.sp,
-                color = Color.White
-            )
-        }
-    }
 }
 

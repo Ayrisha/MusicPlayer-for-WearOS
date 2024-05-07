@@ -19,22 +19,23 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        val player = mediaSession?.player!!
-        if (!player.playWhenReady
-            || player.mediaItemCount == 0
-            || player.playbackState == ExoPlayer.STATE_ENDED) {
-            stopSelf()
+        mediaSession?.player?.let { player ->
+            if (!player.playWhenReady
+                || player.mediaItemCount == 0
+                || player.playbackState == ExoPlayer.STATE_ENDED) {
+                stopSelf()
+            }
         }
     }
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
         mediaSession
 
     override fun onDestroy() {
+        super.onDestroy()
         mediaSession?.run {
             player.release()
             release()
             mediaSession = null
         }
-        super.onDestroy()
     }
 }

@@ -1,6 +1,8 @@
 package com.example.musicplayer.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -17,13 +19,11 @@ fun EmptyBox(
     text: String
 ){
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            modifier = Modifier.width(150.dp),
             textAlign = TextAlign.Center,
             color = Color.Gray
         )

@@ -1,5 +1,6 @@
 package com.example.musicplayer.data.network;
 
+import com.example.musicplayer.data.network.model.PlayListInfo
 import com.example.musicplayer.data.network.model.TrackInfo
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -50,4 +51,12 @@ interface MusicService {
     @GET("/hse/api/v1/music-player-dictionary/likes")
     suspend fun getTracksLike(
     ):List<TrackInfo>
+
+    @POST("/hse/api/v1/music-player-dictionary/playlists/playlist")
+    suspend fun setPlayList(
+        @Query("name") title: String
+    )
+    @GET("/hse/api/v1/music-player-dictionary/playlists")
+    suspend fun getPlayList(
+    ):List<PlayListInfo>
 }

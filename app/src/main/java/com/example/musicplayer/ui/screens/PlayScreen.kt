@@ -23,6 +23,7 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.example.musicplayer.R
+import com.example.musicplayer.ui.viewModel.LikeState
 import com.example.musicplayer.ui.viewModel.LikeViewModel
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -36,18 +37,12 @@ import com.google.android.horologist.media.ui.screens.player.PlayerScreen
 @Composable
 fun  PlayScreen(
     controller: MediaController,
-    id: String,
-    title: String? = "No name",
-    artist: String? = "No name"
+    playerViewModel: PlayerViewModel,
 ) {
-    val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
-
-    var likeState by remember { mutableStateOf(likeViewModel.checkLike(controller.currentMediaItem?.mediaId.toString())) }
-
     val context = LocalContext.current
-    val playerViewModel = PlayerViewModel(controller)
     val volumeViewModel = createVolumeViewModel(context)
-    //playerViewModel.setTrack(id, title.toString(), artist.toString())
+
+    val likeState: LikeState by mutableStateOf(playerViewModel.likeState)
 
     PlayerScreen(
         playerViewModel = playerViewModel,
@@ -64,26 +59,32 @@ fun  PlayScreen(
             }
             IconButton(
                 onClick = {
-                    if (!likeState){
-                        likeViewModel.setLike(controller.currentMediaItem?.mediaId.toString())
+                    when(likeState) {
+                        LikeState.Dislike -> {
+                            playerViewModel.setLike(controller.currentMediaItem?.mediaId.toString())
+                        }
+
+                        LikeState.Like -> {
+                            playerViewModel.deleteLike(controller.currentMediaItem?.mediaId.toString())
+                        }
                     }
-                    else{
-                        likeViewModel.deleteLike(controller.currentMediaItem?.mediaId.toString())
+                }
+                ) {
+                when(likeState) {
+                    LikeState.Like -> {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            tint = Color.White,
+                            contentDescription = "лайк"
+                        )
                     }
-                    likeState = !likeState
-                }) {
-                if (likeState) {
-                    Icon(
-                        imageVector = Icons.Filled.Favorite,
-                        tint = Color.White,
-                        contentDescription = "лайк"
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
-                        tint = Color.White,
-                        contentDescription = "лайк"
-                    )
+                    LikeState.Dislike -> {
+                        Icon(
+                            imageVector = Icons.Filled.FavoriteBorder,
+                            tint = Color.White,
+                            contentDescription = "лайк"
+                        )
+                    }
                 }
             }
             IconButton(

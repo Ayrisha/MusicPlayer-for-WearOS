@@ -9,15 +9,25 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.navigation.compose.NavHost
 import androidx.navigation.NavType
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
+import androidx.navigation.plusAssign
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.WearNavigator
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.musicplayer.data.datastore.MyDataStore
@@ -30,6 +40,8 @@ import com.example.musicplayer.ui.screens.MenuScreen
 import com.example.musicplayer.ui.screens.PlayScreen
 import com.example.musicplayer.ui.screens.PlaylistScreen
 import com.example.musicplayer.ui.screens.SearchScreen
+import com.example.musicplayer.ui.viewModel.LikeViewModel
+import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.coroutineScope
@@ -40,12 +52,13 @@ import okhttp3.internal.wait
 @UnstableApi
 class MainActivity : ComponentActivity() {
     private lateinit var controllerFuture: ListenableFuture<MediaController>
-    @SuppressLint("CoroutineCreationDuringComposition")
+    private lateinit var mediaController: MediaController
+
+    @SuppressLint("RestrictedApi")
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lateinit var mediaController: MediaController
         var startScreen = "AuthScreen"
 
         val sessionToken =
@@ -57,7 +70,7 @@ class MainActivity : ComponentActivity() {
             mediaController = controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
-        lifecycleScope.launch  {
+        lifecycleScope.launch {
             DataStoreManager.getInstance().isCompleted.collect { isCompleted ->
                 startScreen = if (isCompleted) {
                     Log.d("Data", "True")
@@ -71,54 +84,57 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberSwipeDismissableNavController()
-
-            SwipeDismissableNavHost(
-                navController = navController,
-                startDestination = startScreen
-            ) {
-                composable("AuthScreen") {
-                    AuthScreen(navController, "menu_screen")
+            SwipeDismissableNavHost(navController = navController, startDestination = "auth"){
+                navigation(
+                    startDestination = "AuthScreen",
+                    route = "auth"
+                ){
+                    composable("AuthScreen") {
+                        AuthScreen(navController, "menu_screen")
+                    }
                 }
-                composable("menu_screen") {
-                    MenuScreen(navController)
-                }
-                composable(
-                    route = "menu_screen/{name}",
-                    arguments = listOf(
-                        navArgument("name") { type = NavType.StringType }
-                    )
+                navigation(
+                    startDestination = "menu_screen/{name}",
+                    route = "menu"
                 ) {
-                    val name = it.arguments?.getString("name")
-                    MenuScreen(navController, name)
-                }
-                composable("song_search") {
-                    SearchScreen(mediaController, navController)
-                }
-                composable("like_music") {
-                    LikeScreen(mediaController, navController)
-                }
-                composable("playlists") {
-                    PlaylistScreen()
-                }
-                composable("load_musics") {
-                    LoadMusicScreen()
-                }
-                composable(
-                    route = "play_screen/{id}/{title}/{artist}",
-                    arguments = listOf(
-                        navArgument("id") { type = NavType.StringType },
-                        navArgument("title") { type = NavType.StringType },
-                        navArgument("artist") { type = NavType.StringType })
-                ) {
-                    val id = it.arguments?.getString("id")
-                    val title = it.arguments?.getString("title")
-                    val artist = it.arguments?.getString("artist")
-                    if (id != null) {
-                        PlayScreen(mediaController, id, title, artist)
+                    composable("menu_screen") {
+                        MenuScreen(navController)
+                    }
+                    composable(
+                        route = "menu_screen/{name}",
+                        arguments = listOf(
+                            navArgument("name") { type = NavType.StringType }
+                        )
+                    ) {
+                        val name = it.arguments?.getString("name")
+                        MenuScreen(navController, name)
+                    }
+                    composable("song_search") {
+                        SearchScreen(mediaController, navController)
+                    }
+                    composable("like_music") {
+                        LikeScreen(mediaController, navController)
+                    }
+                    composable("playlists") {
+                        PlaylistScreen()
+                    }
+                    composable("load_musics") {
+                        LoadMusicScreen()
+                    }
+                    composable(
+                        route = "play_screen"
+                    ) {
+                        val playerViewModel = PlayerViewModel(mediaController)
+                        PlayScreen(mediaController, playerViewModel)
                     }
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mediaController.release()
     }
 }
 

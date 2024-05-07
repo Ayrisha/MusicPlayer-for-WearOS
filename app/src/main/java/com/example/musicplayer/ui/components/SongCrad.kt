@@ -9,10 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +27,7 @@ import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.Text
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
-import com.example.musicplayer.data.Track
+import com.example.musicplayer.data.model.Track
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -50,6 +46,9 @@ fun SongCard(
         modifier = Modifier
             .fillMaxSize(),
         onClick = {
+            if (mediaController.mediaItemCount != 0){
+                mediaController.clearMediaItems()
+            }
             mediaController.setMediaItems(list.map { track ->
                 MediaItem.Builder()
                     .setMediaId(track.id!!)
@@ -62,7 +61,7 @@ fun SongCard(
                     )
                     .build()
             }, index, 0)
-            navController.navigate("play_screen/$id/$title/$artist")
+            navController.navigate("play_screen")
         }
     ) {
         Row(
@@ -82,20 +81,17 @@ fun SongCard(
                 },
                 fallback = painterResource(R.drawable.baseline_person_24)
             )
-//            Icon(
-//                imageVector = Icons.Rounded.AccountCircle,
-//                contentDescription = "photo",
-//                tint = Color.White
-//            )
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = title,
+                    modifier = Modifier.basicMarquee(),
                     color = Color.White,
                     fontSize=15.sp)
                 artist?.let { Text(
-                    text = it, Modifier.basicMarquee(),
+                    text = it,
+                    modifier = Modifier.basicMarquee(),
                     color = Color.White.copy(alpha = 0.5f),
                     fontSize=10.sp) }
             }
