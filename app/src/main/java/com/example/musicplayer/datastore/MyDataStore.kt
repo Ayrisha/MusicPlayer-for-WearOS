@@ -1,4 +1,4 @@
-package com.example.musicplayer.data.datastore
+package com.example.musicplayer.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -9,11 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 val Context.myDataStore: DataStore<Preferences> by preferencesDataStore("settings")
-
-data class AuthStatus(
-    val isCompleted: Boolean,
-    val isShow: Boolean
-)
 
 class MyDataStore(
     context: Context

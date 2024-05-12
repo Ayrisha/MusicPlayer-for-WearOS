@@ -1,4 +1,4 @@
-package com.example.musicplayer.data.datastore
+package com.example.musicplayer.datastore
 
 import android.content.Context
 

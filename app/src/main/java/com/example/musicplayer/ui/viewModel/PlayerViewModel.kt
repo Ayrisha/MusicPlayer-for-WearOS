@@ -1,31 +1,22 @@
 package com.example.musicplayer.ui.viewModel
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
-import com.example.musicplayer.MusicApplication
-import com.example.musicplayer.data.DefaultAppContainer
+import com.example.musicplayer.DefaultAppContainer
 import com.example.musicplayer.data.MusicPlayerRepository
+import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.media.data.repository.PlayerRepositoryImpl
 import com.google.android.horologist.media.ui.state.PlayerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-sealed interface LikeState{
-    object Like : LikeState
-    object Dislike : LikeState
-}
 
 @UnstableApi
 @OptIn(ExperimentalHorologistApi::class)

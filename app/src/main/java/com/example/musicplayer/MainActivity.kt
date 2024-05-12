@@ -8,46 +8,31 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.navigation.compose.NavHost
 import androidx.navigation.NavType
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import androidx.navigation.plusAssign
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
-import androidx.wear.compose.navigation.WearNavigator
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import com.example.musicplayer.data.datastore.MyDataStore
-import com.example.musicplayer.data.PlaybackService
-import com.example.musicplayer.data.datastore.DataStoreManager
+import com.example.musicplayer.datastore.DataStoreManager
+import com.example.musicplayer.ui.screens.AddPlayListScreen
 import com.example.musicplayer.ui.screens.AuthScreen
 import com.example.musicplayer.ui.screens.LikeScreen
 import com.example.musicplayer.ui.screens.LoadMusicScreen
 import com.example.musicplayer.ui.screens.MenuScreen
+import com.example.musicplayer.ui.screens.PlayListTracksScreen
 import com.example.musicplayer.ui.screens.PlayScreen
 import com.example.musicplayer.ui.screens.PlaylistScreen
 import com.example.musicplayer.ui.screens.SearchScreen
-import com.example.musicplayer.ui.viewModel.LikeViewModel
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 
 @UnstableApi
 class MainActivity : ComponentActivity() {
@@ -115,8 +100,27 @@ class MainActivity : ComponentActivity() {
                     composable("like_music") {
                         LikeScreen(mediaController, navController)
                     }
+                    composable("playlists/{trackId}",
+                        arguments = listOf(
+                            navArgument("trackId") { type = NavType.StringType }
+                        )) {
+                        val trackId = it.arguments?.getString("trackId")
+                        PlaylistScreen(navController, trackId)
+                    }
                     composable("playlists") {
-                        PlaylistScreen()
+                        PlaylistScreen(navController)
+                    }
+                    composable("addplaylist") {
+                        AddPlayListScreen(navController)
+                    }
+                    composable(
+                        "playlisttracks/{playlistname}",
+                        arguments = listOf(
+                            navArgument("playlistname") {type = NavType.StringType}
+                        )
+                    ){
+                        val playlistname = it.arguments?.getString("playlistname")
+                        playlistname?.let { it1 -> PlayListTracksScreen(it1, mediaController, navController) }
                     }
                     composable("load_musics") {
                         LoadMusicScreen()
@@ -125,7 +129,7 @@ class MainActivity : ComponentActivity() {
                         route = "play_screen"
                     ) {
                         val playerViewModel = PlayerViewModel(mediaController)
-                        PlayScreen(mediaController, playerViewModel)
+                        PlayScreen(navController, mediaController, playerViewModel)
                     }
                 }
             }
@@ -134,7 +138,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        mediaController.release()
+        if (::mediaController.isInitialized) {
+            mediaController.release()
+        }
     }
 }
 

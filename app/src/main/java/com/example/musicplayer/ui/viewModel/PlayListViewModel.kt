@@ -16,15 +16,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.data.model.PlayList
+import com.example.musicplayer.ui.viewModel.state.PlayListUiState
 import kotlinx.coroutines.launch
 import java.io.IOException
-
-sealed interface PlayListUiState{
-    data class Success(val plaLists: List<PlayList>) : PlayListUiState
-    object Empty : PlayListUiState
-    object Error : PlayListUiState
-    object Loading : PlayListUiState
-}
 
 class PlayListViewModel(
     private val musicPlayerRepository: MusicPlayerRepository
@@ -46,7 +40,7 @@ class PlayListViewModel(
             playListUiState = try {
                 val listPlayList = musicPlayerRepository.getPlayList()
                 if (listPlayList.isEmpty()){
-                    PlayListUiState.Error
+                    PlayListUiState.Empty
                 }
                 else{
                     PlayListUiState.Success(plaLists = listPlayList)
@@ -63,6 +57,14 @@ class PlayListViewModel(
     fun setPlaylists(title: String){
         viewModelScope.launch {
             musicPlayerRepository.setPlayList(title)
+            getPlaylists()
+        }
+    }
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun deletePlaylist(title: String){
+        viewModelScope.launch {
+            musicPlayerRepository.deletePlayList(title)
             getPlaylists()
         }
     }

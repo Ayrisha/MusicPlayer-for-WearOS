@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.database.StandaloneDatabaseProvider
-import com.example.musicplayer.data.AppContainer
-import com.example.musicplayer.data.DefaultAppContainer
-import com.example.musicplayer.data.datastore.DataStoreManager
+import com.example.musicplayer.datastore.DataStoreManager
 
 class MusicApplication: Application() {
     lateinit var container: AppContainer

@@ -1,4 +1,4 @@
-package com.example.musicplayer.data.auth
+package com.example.musicplayer.auth
 
 import android.app.Application
 import android.content.Context
@@ -20,8 +20,6 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
-import java.util.UUID
 
 
 private const val TAG = "AuthGoogleViewModel"

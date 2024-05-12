@@ -1,4 +1,4 @@
-package com.example.musicplayer.data.download
+package com.example.musicplayer.download
 
 import android.annotation.SuppressLint
 import androidx.media3.exoplayer.offline.Download

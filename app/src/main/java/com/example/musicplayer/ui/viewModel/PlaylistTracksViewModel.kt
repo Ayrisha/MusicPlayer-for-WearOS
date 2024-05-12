@@ -17,16 +17,16 @@ import com.example.musicplayer.ui.viewModel.state.TrackListState
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-class LikeViewModel (
+class PlaylistTracksViewModel (
     private val musicPlayerRepository: MusicPlayerRepository
 ): ViewModel(){
     var likeUiState: TrackListState by mutableStateOf(TrackListState.Loading)
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun getTracksLike(){
+    fun getTracks(title:String){
         viewModelScope.launch {
             likeUiState = try {
-                val listLikes = musicPlayerRepository.getTracksLike()
+                val listLikes = musicPlayerRepository.getPlayListTracks(title)
                 if (listLikes.isEmpty()){
                     TrackListState.Empty
                 }
@@ -41,11 +41,17 @@ class LikeViewModel (
         }
     }
 
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun deleteTrackLike(trackId: String){
+    fun setTrack(title:String, trackId: String){
         viewModelScope.launch {
-            musicPlayerRepository.deleteTrackLike(trackId)
-            getTracksLike()
+            musicPlayerRepository.setPlayListTrack(title, trackId)
+        }
+    }
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun deleteTrack(title:String, trackId: String){
+        viewModelScope.launch {
+            musicPlayerRepository.deletePlayListTrack(title, trackId)
+            getTracks(title)
         }
     }
 
@@ -54,7 +60,7 @@ class LikeViewModel (
             initializer {
                 val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MusicApplication)
                 val musicRepository = application.container.musicPlayerRepository
-                LikeViewModel(musicPlayerRepository = musicRepository)
+                PlaylistTracksViewModel(musicPlayerRepository = musicRepository)
             }
         }
     }

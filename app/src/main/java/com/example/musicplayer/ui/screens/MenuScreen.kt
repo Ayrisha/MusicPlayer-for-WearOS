@@ -10,30 +10,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.util.Log
 import androidx.navigation.NavController
 import androidx.wear.activity.ConfirmationActivity
 import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import com.example.musicplayer.R
-import com.example.musicplayer.data.datastore.AuthStatus
-import com.example.musicplayer.data.datastore.DataStoreManager
-import com.example.musicplayer.data.datastore.MyDataStore
+import com.example.musicplayer.datastore.DataStoreManager
 import com.example.musicplayer.ui.components.MenuItem
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -41,11 +34,13 @@ import okhttp3.internal.wait
 fun MenuScreen(navController: NavController, username: String? = "") {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val click = "menu"
 
     Scaffold(
         vignette = {
             Vignette(vignettePosition = VignettePosition.TopAndBottom)
-        }
+        },
+        timeText = { TimeText() }
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),

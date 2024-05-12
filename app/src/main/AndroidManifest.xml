@@ -26,7 +26,7 @@
         android:theme="@android:style/Theme.DeviceDefault">
 
         <service
-            android:name=".data.download.MediaDownloadServiceImpl"
+            android:name="com.example.musicplayer.download.MediaDownloadServiceImpl"
             android:exported="false"
             android:foregroundServiceType="dataSync"
             tools:ignore="ForegroundServicePermission">
@@ -38,7 +38,7 @@
         </service>
 
         <service
-            android:name=".data.PlaybackService"
+            android:name=".PlaybackService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="true">
             <intent-filter>

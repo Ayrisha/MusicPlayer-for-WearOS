@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -12,7 +11,6 @@ import androidx.media3.common.util.Log
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
-import androidx.wear.compose.foundation.RevealValue
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -30,22 +28,24 @@ import com.example.musicplayer.ui.components.Loading
 import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.components.SwipeSongCard
-import com.example.musicplayer.ui.viewModel.LikeViewModel
+import com.example.musicplayer.ui.viewModel.PlaylistTracksViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
 
+@OptIn(ExperimentalWearFoundationApi::class)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun LikeScreen(
+fun PlayListTracksScreen(
+    playlistName: String,
     mediaController: MediaController,
     navController: NavController
 ) {
-    val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
+    val tracksViewModel: PlaylistTracksViewModel = viewModel(factory = PlaylistTracksViewModel.Factory)
 
-    val songUiState = likeViewModel.likeUiState
+    val songUiState = tracksViewModel.likeUiState
 
     val listState = rememberScalingLazyListState()
 
-    likeViewModel.getTracksLike()
+    tracksViewModel.getTracks(playlistName)
 
     Scaffold(
         vignette = {
@@ -56,19 +56,33 @@ fun LikeScreen(
         },
         timeText = { TimeText(modifier = Modifier.scrollAway(listState)) }
     ) {
-        ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            state = listState
-        ) {
-            item {
-                ListHeader {
-                    Text(text = "Избранное")
-                }
+        when (songUiState) {
+            is TrackListState.Empty -> {
+                EmptyBox("Нет добавленных треков")
             }
-            when (songUiState) {
-                is TrackListState.Success ->
-                    itemsIndexed(songUiState.tracks.reversed()) { index, item ->
+
+            is TrackListState.Loading -> {
+                Loading()
+            }
+
+            is TrackListState.Error -> {
+                Retry(
+                    retryAction = {
+                        tracksViewModel.getTracks(playlistName)
+                    })
+            }
+            is TrackListState.Success ->
+                ScalingLazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    state = listState
+                ) {
+                    item {
+                        ListHeader {
+                            Text(text = playlistName)
+                        }
+                    }
+                    itemsIndexed(songUiState.tracks) { index, item ->
                         SwipeSongCard(
                             index = index,
                             mediaController = mediaController,
@@ -79,27 +93,13 @@ fun LikeScreen(
                             artist = item.artist,
                             img = item.imgLink,
                             onSwipe = {
-                                item.id?.let { likeViewModel.deleteTrackLike(item.id) }
+                                item.id?.let {
+                                    tracksViewModel.deleteTrack(playlistName, item.id)}
                             }
                         )
                     }
-
-                is TrackListState.Empty -> item {
-                    EmptyBox("Нет избранных")
                 }
 
-                is TrackListState.Loading -> item {
-                    Loading()
-                }
-
-                is TrackListState.Error -> item {
-                    Retry(
-                        retryAction = {
-                            likeViewModel.getTracksLike()
-                        })
-                }
-            }
         }
     }
 }
-

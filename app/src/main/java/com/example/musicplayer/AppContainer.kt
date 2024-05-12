@@ -1,8 +1,9 @@
-package com.example.musicplayer.data
+package com.example.musicplayer
 
+import com.example.musicplayer.auth.BasicAuthInterceptor
+import com.example.musicplayer.data.MusicPlayerRepository
+import com.example.musicplayer.data.NetworkMusicPlayerRepository
 import com.example.musicplayer.data.network.MusicService
-import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import com.google.android.horologist.media.data.database.dao.MediaDownloadDao
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,7 +13,7 @@ interface AppContainer{
     val musicPlayerRepository: MusicPlayerRepository
 }
 
-class DefaultAppContainer : AppContainer{
+class DefaultAppContainer : AppContainer {
 
     private val BASE_URL = "http://45.15.158.128:8080"
 

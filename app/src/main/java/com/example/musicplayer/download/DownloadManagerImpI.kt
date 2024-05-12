@@ -1,13 +1,9 @@
-package com.example.musicplayer.data.download
+package com.example.musicplayer.download
 
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.cache.NoOpCacheEvictor
-import androidx.media3.datasource.cache.SimpleCache
-import androidx.media3.exoplayer.offline.DownloadManager
-import java.io.File
 import java.util.concurrent.Executor
 
 class DownloadManagerImpI(

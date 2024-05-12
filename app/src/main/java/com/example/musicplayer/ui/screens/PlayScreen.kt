@@ -12,20 +12,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
+import androidx.navigation.NavController
 import com.example.musicplayer.R
-import com.example.musicplayer.ui.viewModel.LikeState
-import com.example.musicplayer.ui.viewModel.LikeViewModel
+import com.example.musicplayer.ui.components.PlayListChip
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
+import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.audio.SystemAudioRepository
 import com.google.android.horologist.audio.ui.VolumeViewModel
@@ -36,6 +34,7 @@ import com.google.android.horologist.media.ui.screens.player.PlayerScreen
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun  PlayScreen(
+    navController: NavController,
     controller: MediaController,
     playerViewModel: PlayerViewModel,
 ) {
@@ -88,7 +87,9 @@ fun  PlayScreen(
                 }
             }
             IconButton(
-                onClick = { }) {
+                onClick = {
+                    navController.navigate("playlists/${controller.currentMediaItem?.mediaId.toString()}")
+                }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_playlist_add_24),
                     tint = Color.White,

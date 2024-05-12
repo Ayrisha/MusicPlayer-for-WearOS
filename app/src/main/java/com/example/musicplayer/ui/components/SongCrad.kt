@@ -5,9 +5,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,13 +21,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Card
+import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
 import coil.compose.AsyncImage
 import com.example.musicplayer.R
@@ -41,10 +49,9 @@ fun SongCard(
     artist: String?,
     img: String?
 ) {
-    Card(
-        backgroundPainter = ColorPainter(color = Color(0xFF1C1B1F)),
+    Chip(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxWidth().height(52.dp),
         onClick = {
             if (mediaController.mediaItemCount != 0){
                 mediaController.clearMediaItems()
@@ -62,7 +69,12 @@ fun SongCard(
                     .build()
             }, index, 0)
             navController.navigate("play_screen")
-        }
+        },
+        colors = ChipDefaults.chipColors(
+            backgroundColor = Color(0xFF1C1B1F),
+        ),
+        border = ChipDefaults.chipBorder(),
+        contentPadding = PaddingValues(10.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -79,16 +91,17 @@ fun SongCard(
                     val throwable = errorState.result.throwable
                     Log.e("AsyncImage", "Error: $throwable")
                 },
-                fallback = painterResource(R.drawable.baseline_person_24)
+                fallback = painterResource(R.drawable.baseline_person_24),
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = title,
-                    modifier = Modifier.basicMarquee(),
                     color = Color.White,
-                    fontSize=15.sp)
+                    fontSize=15.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1)
                 artist?.let { Text(
                     text = it,
                     modifier = Modifier.basicMarquee(),
