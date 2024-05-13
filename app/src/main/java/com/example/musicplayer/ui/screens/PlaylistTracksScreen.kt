@@ -12,6 +12,7 @@ import androidx.media3.session.MediaController
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberRevealState
@@ -62,7 +63,7 @@ fun PlayListTracksScreen(
             }
 
             is TrackListState.Loading -> {
-                Loading()
+                Loading(Modifier.fillMaxSize())
             }
 
             is TrackListState.Error -> {
@@ -75,7 +76,10 @@ fun PlayListTracksScreen(
                 ScalingLazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    state = listState
+                    state = listState,
+                    flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
+                        state = listState
+                    )
                 ) {
                     item {
                         ListHeader {

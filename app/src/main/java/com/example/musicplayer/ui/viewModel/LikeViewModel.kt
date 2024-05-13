@@ -14,7 +14,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.ui.viewModel.state.TrackListState
+import com.example.musicplayer.ui.viewModel.state.TrackUiState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
 import java.io.IOException
 
 class LikeViewModel (
@@ -25,17 +27,19 @@ class LikeViewModel (
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getTracksLike(){
         viewModelScope.launch {
+            TrackListState.Loading
+            kotlinx.coroutines.delay(2000)
             likeUiState = try {
                 val listLikes = musicPlayerRepository.getTracksLike()
                 if (listLikes.isEmpty()){
                     TrackListState.Empty
                 }
                 else{
-                    TrackListState.Success(tracks = listLikes)
+                    TrackListState.Success(tracks = listLikes.asReversed())
                 }
-            } catch (e: IOException){
-                TrackListState.Error
             } catch (e: HttpException){
+                TrackListState.Error
+            } catch (e: IOException){
                 TrackListState.Error
             }
         }

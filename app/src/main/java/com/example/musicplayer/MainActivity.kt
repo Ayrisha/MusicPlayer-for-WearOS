@@ -2,8 +2,11 @@ package com.example.musicplayer
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -20,6 +23,7 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.musicplayer.datastore.DataStoreManager
+import com.example.musicplayer.media.PlaybackService
 import com.example.musicplayer.ui.screens.AddPlayListScreen
 import com.example.musicplayer.ui.screens.AuthScreen
 import com.example.musicplayer.ui.screens.LikeScreen
@@ -28,6 +32,7 @@ import com.example.musicplayer.ui.screens.MenuScreen
 import com.example.musicplayer.ui.screens.PlayListTracksScreen
 import com.example.musicplayer.ui.screens.PlayScreen
 import com.example.musicplayer.ui.screens.PlaylistScreen
+import com.example.musicplayer.ui.screens.SearchBarScreen
 import com.example.musicplayer.ui.screens.SearchScreen
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.common.util.concurrent.ListenableFuture
@@ -97,6 +102,9 @@ class MainActivity : ComponentActivity() {
                     composable("song_search") {
                         SearchScreen(mediaController, navController)
                     }
+                    composable("searchscreen") {
+                        SearchBarScreen(navController)
+                    }
                     composable("like_music") {
                         LikeScreen(mediaController, navController)
                     }
@@ -136,8 +144,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
         if (::mediaController.isInitialized) {
             mediaController.release()
         }

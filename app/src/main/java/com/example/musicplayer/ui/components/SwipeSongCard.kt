@@ -26,6 +26,7 @@ import androidx.wear.compose.material.SwipeToRevealActionColors
 import androidx.wear.compose.material.SwipeToRevealChip
 import androidx.wear.compose.material.SwipeToRevealDefaults
 import com.example.musicplayer.data.model.Track
+import com.example.musicplayer.media.MediaManager
 import com.example.musicplayer.ui.viewModel.LikeViewModel
 import com.example.musicplayer.ui.viewModel.PlaylistTracksViewModel
 import kotlinx.coroutines.cancel
@@ -46,6 +47,7 @@ fun SwipeSongCard(
     img: String?,
     onSwipe: () -> Unit
 ){
+    val mediaManager = MediaManager(mediaController)
     val coroutineScope = rememberCoroutineScope()
     val revealState = rememberRevealState()
 
@@ -74,14 +76,13 @@ fun SwipeSongCard(
         )
     ){
         SongCard(
-            index = index,
-            mediaController = mediaController,
-            list = list,
-            navController = navController,
-            id = id,
             title = title,
             artist = artist,
-            img = img
+            img = img,
+            onClick = {
+                mediaManager.setMediaItems(list, index)
+                navController.navigate("play_screen")
+            }
         )
     }
 }

@@ -16,13 +16,12 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
-import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.ui.viewModel.state.TrackUiState
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-class TrackViewModel (
+class SearchViewModel (
     private val musicPlayerRepository: MusicPlayerRepository
 ): ViewModel(){
 
@@ -34,6 +33,7 @@ class TrackViewModel (
 
     fun popularTrack(){
         viewModelScope.launch {
+            TrackUiState.Loading
             trackUiState = try {
                 val listPopularTrack = musicPlayerRepository.popularTrack()
                 if (listPopularTrack.isEmpty()){
@@ -42,9 +42,9 @@ class TrackViewModel (
                 else{
                     TrackUiState.Start(trackPopular = listPopularTrack)
                 }
-            } catch (e: IOException){
-                TrackUiState.Error
             } catch (e: HttpException){
+                TrackUiState.Error
+            } catch (e: IOException){
                 TrackUiState.Error
             }
         }
@@ -61,9 +61,9 @@ class TrackViewModel (
                 else{
                     TrackUiState.Success(trackSearches = listTrack)
                 }
-            } catch (e: IOException){
-                TrackUiState.Error
             } catch (e: HttpException){
+                TrackUiState.Error
+            } catch (e: IOException){
                 TrackUiState.Error
             }
         }
@@ -78,7 +78,7 @@ class TrackViewModel (
             initializer {
                 val application = (this[APPLICATION_KEY] as MusicApplication)
                 val musicRepository = application.container.musicPlayerRepository
-                TrackViewModel(musicPlayerRepository = musicRepository)
+                SearchViewModel(musicPlayerRepository = musicRepository)
             }
         }
     }

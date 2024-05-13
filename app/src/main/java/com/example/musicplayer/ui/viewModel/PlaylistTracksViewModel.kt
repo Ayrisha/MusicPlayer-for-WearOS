@@ -24,6 +24,7 @@ class PlaylistTracksViewModel (
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getTracks(title:String){
+        TrackListState.Loading
         viewModelScope.launch {
             likeUiState = try {
                 val listLikes = musicPlayerRepository.getPlayListTracks(title)
@@ -33,9 +34,9 @@ class PlaylistTracksViewModel (
                 else{
                     TrackListState.Success(tracks = listLikes)
                 }
-            } catch (e: IOException){
-                TrackListState.Error
             } catch (e: HttpException){
+                TrackListState.Error
+            } catch (e: IOException){
                 TrackListState.Error
             }
         }

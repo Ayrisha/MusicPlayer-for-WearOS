@@ -49,7 +49,7 @@ fun Retry (
             Card(
                 onClick = retryAction,
                 modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally, true),
-                backgroundPainter = ColorPainter(Color.DarkGray)
+                backgroundPainter = ColorPainter(Color(32,33,36))
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)

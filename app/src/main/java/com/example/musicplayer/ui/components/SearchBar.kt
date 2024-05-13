@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.ContentAlpha
+import androidx.wear.compose.material.Text
 
 @Composable
 fun SearchBar(
@@ -38,21 +39,7 @@ fun SearchBar(
             onTextChange(it)
         },
         singleLine = true,
-        leadingIcon = {
-            IconButton(
-                modifier = Modifier.size(15.dp)
-                    .alpha(ContentAlpha.disabled),
-                onClick = { onSearchClicked(text) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Icon",
-                    modifier = Modifier.size(20.dp),
-                    tint = Color.White
-                )
-
-            }
-        },
+        placeholder = { Text(text = "Поиск", color = Color.White.copy(alpha = 0.5f))},
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Search
         ),

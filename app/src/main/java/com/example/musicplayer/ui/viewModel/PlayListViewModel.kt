@@ -17,6 +17,7 @@ import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.data.model.PlayList
 import com.example.musicplayer.ui.viewModel.state.PlayListUiState
+import com.example.musicplayer.ui.viewModel.state.TrackListState
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -37,6 +38,7 @@ class PlayListViewModel(
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getPlaylists(){
         viewModelScope.launch {
+            PlayListUiState.Loading
             playListUiState = try {
                 val listPlayList = musicPlayerRepository.getPlayList()
                 if (listPlayList.isEmpty()){
@@ -45,9 +47,9 @@ class PlayListViewModel(
                 else{
                     PlayListUiState.Success(plaLists = listPlayList)
                 }
-            } catch (e: IOException){
-                PlayListUiState.Error
             } catch (e: HttpException){
+                PlayListUiState.Error
+            } catch (e: IOException){
                 PlayListUiState.Error
             }
         }

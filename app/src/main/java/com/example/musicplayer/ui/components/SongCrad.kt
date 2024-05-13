@@ -7,69 +7,46 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
-import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.example.musicplayer.R
 import com.example.musicplayer.data.model.Track
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongCard(
-    index: Int,
-    mediaController: MediaController,
-    list: List<Track>,
-    navController: NavController,
-    id: String?,
     title: String,
     artist: String?,
-    img: String?
+    img: String?,
+    onClick: () -> Unit
 ) {
     Chip(
         modifier = Modifier
-            .fillMaxWidth().height(52.dp),
-        onClick = {
-            if (mediaController.mediaItemCount != 0){
-                mediaController.clearMediaItems()
-            }
-            mediaController.setMediaItems(list.map { track ->
-                MediaItem.Builder()
-                    .setMediaId(track.id!!)
-                    .setUri("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/${track.id}.mp3")
-                    .setMediaMetadata(
-                        MediaMetadata.Builder()
-                            .setArtist(track.artist)
-                            .setTitle(track.title)
-                            .build()
-                    )
-                    .build()
-            }, index, 0)
-            navController.navigate("play_screen")
-        },
+            .fillMaxWidth().height(ChipDefaults.Height),
+        onClick = { onClick() },
         colors = ChipDefaults.chipColors(
             backgroundColor = Color(0xFF1C1B1F),
         ),
@@ -81,7 +58,11 @@ fun SongCard(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ){
             AsyncImage(
-                model = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/$img.png",
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/$img.png")
+                    .crossfade(true)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build(),
                 contentDescription = "Profile picture",
                 modifier = Modifier
                     .size(30.dp)

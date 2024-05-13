@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.RevealValue
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberRevealState
@@ -32,6 +33,7 @@ import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.components.SwipeSongCard
 import com.example.musicplayer.ui.viewModel.LikeViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
+import kotlinx.coroutines.delay
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
@@ -59,7 +61,10 @@ fun LikeScreen(
         ScalingLazyColumn(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            state = listState
+            state = listState,
+            flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
+                state = listState
+            )
         ) {
             item {
                 ListHeader {
@@ -68,7 +73,7 @@ fun LikeScreen(
             }
             when (songUiState) {
                 is TrackListState.Success ->
-                    itemsIndexed(songUiState.tracks.reversed()) { index, item ->
+                    itemsIndexed(songUiState.tracks) { index, item ->
                         SwipeSongCard(
                             index = index,
                             mediaController = mediaController,
@@ -89,7 +94,7 @@ fun LikeScreen(
                 }
 
                 is TrackListState.Loading -> item {
-                    Loading()
+                    Loading(Modifier.fillParentMaxSize())
                 }
 
                 is TrackListState.Error -> item {

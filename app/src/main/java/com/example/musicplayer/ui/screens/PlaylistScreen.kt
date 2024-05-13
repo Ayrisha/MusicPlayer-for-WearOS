@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Button
@@ -64,7 +65,10 @@ fun PlaylistScreen(
         ScalingLazyColumn(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            state = listState
+            state = listState,
+            flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
+                state = listState
+            )
         ) {
             item {
                 Button(
@@ -102,7 +106,7 @@ fun PlaylistScreen(
                     }
                 }
                 is PlayListUiState.Loading -> item{
-                    Loading()
+                    Loading(Modifier.fillParentMaxSize())
                 }
                 is PlayListUiState.Success ->
                     itemsIndexed(playListUiState.plaLists, key = { _, item -> item.title }) { _, item ->
