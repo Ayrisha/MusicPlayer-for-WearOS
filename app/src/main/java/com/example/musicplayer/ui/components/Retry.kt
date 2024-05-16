@@ -44,7 +44,7 @@ fun Retry (
             Text(
                 text = "Проверьте подключение и повторите попытку",
                 textAlign = TextAlign.Center,
-                color = Color.White
+                color = Color.White.copy(alpha = 0.5f)
             )
             Card(
                 onClick = retryAction,

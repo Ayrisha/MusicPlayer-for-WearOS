@@ -13,11 +13,13 @@ import androidx.media3.session.MediaController
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.RevealValue
+import androidx.wear.compose.foundation.SwipeToDismissBox
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberRevealState
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
@@ -49,62 +51,62 @@ fun LikeScreen(
 
     likeViewModel.getTracksLike()
 
-    Scaffold(
-        vignette = {
-            Vignette(vignettePosition = VignettePosition.Bottom)
-        },
-        positionIndicator = {
-            PositionIndicator(listState)
-        },
-        timeText = { TimeText(modifier = Modifier.scrollAway(listState)) }
-    ) {
-        ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            state = listState,
-            flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
-                state = listState
-            )
+        Scaffold(
+            vignette = {
+                Vignette(vignettePosition = VignettePosition.Bottom)
+            },
+            positionIndicator = {
+                PositionIndicator(listState)
+            },
+            timeText = { TimeText(modifier = Modifier.scrollAway(listState)) }
         ) {
-            item {
-                ListHeader {
-                    Text(text = "Избранное")
+            ScalingLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                state = listState,
+                flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
+                    state = listState
+                )
+            ) {
+                item {
+                    ListHeader {
+                        Text(text = "Избранное")
+                    }
                 }
-            }
-            when (songUiState) {
-                is TrackListState.Success ->
-                    itemsIndexed(songUiState.tracks) { index, item ->
-                        SwipeSongCard(
-                            index = index,
-                            mediaController = mediaController,
-                            list = songUiState.tracks,
-                            navController = navController,
-                            id = item.id,
-                            title = item.title,
-                            artist = item.artist,
-                            img = item.imgLink,
-                            onSwipe = {
-                                item.id?.let { likeViewModel.deleteTrackLike(item.id) }
-                            }
-                        )
+                when (songUiState) {
+                    is TrackListState.Success ->
+                        itemsIndexed(songUiState.tracks) { index, item ->
+                            SwipeSongCard(
+                                index = index,
+                                mediaController = mediaController,
+                                list = songUiState.tracks,
+                                navController = navController,
+                                id = item.id,
+                                title = item.title,
+                                artist = item.artist,
+                                img = item.imgLink,
+                                onSwipe = {
+                                    item.id?.let { likeViewModel.deleteTrackLike(item.id) }
+                                }
+                            )
+                        }
+
+                    is TrackListState.Empty -> item {
+                        EmptyBox("Нет избранных")
                     }
 
-                is TrackListState.Empty -> item {
-                    EmptyBox("Нет избранных")
-                }
+                    is TrackListState.Loading -> item {
+                        Loading()
+                    }
 
-                is TrackListState.Loading -> item {
-                    Loading(Modifier.fillParentMaxSize())
-                }
-
-                is TrackListState.Error -> item {
-                    Retry(
-                        retryAction = {
-                            likeViewModel.getTracksLike()
-                        })
+                    is TrackListState.Error -> item {
+                        Retry(
+                            retryAction = {
+                                likeViewModel.getTracksLike()
+                            })
+                    }
                 }
             }
         }
-    }
 }
 

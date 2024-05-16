@@ -27,10 +27,6 @@ class SearchViewModel (
 
     var trackUiState: TrackUiState by mutableStateOf(TrackUiState.Loading)
 
-    private val _searchTextState: MutableState<String> =
-        mutableStateOf(value = "")
-    val searchTextState: State<String> = _searchTextState
-
     fun popularTrack(){
         viewModelScope.launch {
             TrackUiState.Loading
@@ -52,6 +48,7 @@ class SearchViewModel (
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun searchTrack(title: String){
+        TrackUiState.Loading
         viewModelScope.launch {
             trackUiState = try {
                 val listTrack = musicPlayerRepository.searchTrack(title)
@@ -67,10 +64,6 @@ class SearchViewModel (
                 TrackUiState.Error
             }
         }
-    }
-
-    fun updateSearchTextState(newValue: String) {
-        _searchTextState.value = newValue
     }
 
     companion object{

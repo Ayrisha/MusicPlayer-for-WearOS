@@ -20,7 +20,9 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
+import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
+import com.example.musicplayer.download.DownloadTracker
 import com.example.musicplayer.ui.components.PlayListChip
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.example.musicplayer.ui.viewModel.state.LikeState
@@ -43,12 +45,24 @@ fun  PlayScreen(
 
     val likeState: LikeState by mutableStateOf(playerViewModel.likeState)
 
+    val downloadManager = (context.applicationContext as MusicApplication).container.downloadManager
+
+    val downloadTracker = DownloadTracker(downloadManager)
+
     PlayerScreen(
         playerViewModel = playerViewModel,
         volumeViewModel = volumeViewModel,
         buttons = {
             IconButton(
                 onClick = {
+                    controller.currentMediaItem?.mediaMetadata?.artworkUri?.let { it1 ->
+                        controller.currentMediaItem?.mediaId?.let { it2 ->
+                            downloadTracker.addDownload(
+                                it1,
+                                it2,
+                                context)
+                        }
+                    }
                 }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_download_24),

@@ -27,13 +27,11 @@ import androidx.wear.compose.material.Text
 fun SearchBar(
     text: String,
     onTextChange: (String) -> Unit,
-    onSearchClicked: (String) -> Unit,
-    keyboardController: SoftwareKeyboardController?
+    onSearchClicked: (String) -> Unit
 ) {
     TextField(
         modifier = Modifier
-            .size(155.dp, 55.dp)
-            .padding(bottom = 10.dp),
+            .size(155.dp, 55.dp),
         value = text,
         onValueChange = {
             onTextChange(it)
@@ -46,11 +44,10 @@ fun SearchBar(
         keyboardActions = KeyboardActions(
             onSearch = {
                 onSearchClicked(text)
-                keyboardController?.hide()
             }
         ),
         textStyle = TextStyle.Default.copy(fontSize = 10.sp),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = TextFieldDefaults.colors(
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White,

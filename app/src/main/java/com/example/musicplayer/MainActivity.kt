@@ -2,15 +2,13 @@ package com.example.musicplayer
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -24,6 +22,7 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.musicplayer.datastore.DataStoreManager
 import com.example.musicplayer.media.PlaybackService
+import com.example.musicplayer.ui.components.ConfirmationCard
 import com.example.musicplayer.ui.screens.AddPlayListScreen
 import com.example.musicplayer.ui.screens.AuthScreen
 import com.example.musicplayer.ui.screens.LikeScreen
@@ -49,7 +48,6 @@ class MainActivity : ComponentActivity() {
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var startScreen = "AuthScreen"
 
         val sessionToken =
             SessionToken(this, ComponentName(this, PlaybackService::class.java))
@@ -60,27 +58,30 @@ class MainActivity : ComponentActivity() {
             mediaController = controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
-        lifecycleScope.launch {
-            DataStoreManager.getInstance().isCompleted.collect { isCompleted ->
-                startScreen = if (isCompleted) {
-                    Log.d("Data", "True")
-                    "menu_screen"
-                } else {
-                    Log.d("Data", "False")
-                    "AuthScreen"
-                }
-            }
-        }
 
         setContent {
             val navController = rememberSwipeDismissableNavController()
+
             SwipeDismissableNavHost(navController = navController, startDestination = "auth"){
                 navigation(
                     startDestination = "AuthScreen",
                     route = "auth"
                 ){
                     composable("AuthScreen") {
-                        AuthScreen(navController, "menu_screen")
+                        AuthScreen(navController)
+                    }
+                    composable(
+                        "confirmation/{displayName}/{email}/{photoUrl}",
+                        arguments = listOf(
+                            navArgument("displayName") { type = NavType.StringType },
+                            navArgument("email") { type = NavType.StringType },
+                            navArgument("photoUrl") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val displayName = backStackEntry.arguments?.getString("displayName")
+                        val email = backStackEntry.arguments?.getString("email")
+                        val photoUrl = backStackEntry.arguments?.getString("photoUrl")
+                        ConfirmationCard(navController, displayName, email, photoUrl)
                     }
                 }
                 navigation(
@@ -136,7 +137,8 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = "play_screen"
                     ) {
-                        val playerViewModel = PlayerViewModel(mediaController)
+                        val context = LocalContext.current
+                        val playerViewModel = PlayerViewModel(mediaController, context = context)
                         PlayScreen(navController, mediaController, playerViewModel)
                     }
                 }

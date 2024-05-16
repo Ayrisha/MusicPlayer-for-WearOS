@@ -20,23 +20,26 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.launch
+import java.security.MessageDigest
+import java.util.UUID
 
 
 private const val TAG = "AuthGoogleViewModel"
 private const val CLIENT_ID =
-    "550470458277-2dvd7f06dd8npndqtc6o9kt9tcudjofn.apps.googleusercontent.com"
+    "252383755739-c44ivk628931fm88lthmm21aoc2v86qb.apps.googleusercontent.com"
 
 class AuthGoogleViewModel(application: Application) : AndroidViewModel(application) {
     fun startAuthFlow(context: Context) {
         val credentialManager = CredentialManager.create(context)
 
-//        val rowNonce = UUID.randomUUID().toString()
-//        val bytes = rowNonce.toByteArray()
-//        val md = MessageDigest.getInstance("SHA-256")
-//        val digest = md.digest(bytes)
-//        val hashedNonce = digest.fold(""){ _, it -> "%02x".format(it)}
+        val rowNonce = UUID.randomUUID().toString()
+        val bytes = rowNonce.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        val hashedNonce = digest.fold(""){ _, it -> "%02x".format(it)}
 
         val googleIdOption: GetSignInWithGoogleOption = GetSignInWithGoogleOption.Builder(CLIENT_ID)
+            .setNonce(hashedNonce)
             .build()
 
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
@@ -58,27 +61,16 @@ class AuthGoogleViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun handleSignIn(result: GetCredentialResponse) {
         when (val credential = result.credential) {
-            is PublicKeyCredential -> {
-                val responseJson = credential.authenticationResponseJson
-                Log.d(TAG, "PublicKeyCredential")
-            }
-
-            is PasswordCredential -> {
-                val username = credential.id
-                val password = credential.password
-                Log.d(TAG, "PasswordCredential")
-            }
-
             is CustomCredential -> {
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential
                             .createFrom(credential.data)
-                        Log.e(TAG, "googleIdTokenCredential $googleIdTokenCredential")
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Received an invalid google id token response", e)
                     }
-                } else {
+                }
+                else {
                     Log.e(TAG, "Unexpected type of credential")
                 }
             }

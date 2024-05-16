@@ -63,7 +63,7 @@ fun PlayListTracksScreen(
             }
 
             is TrackListState.Loading -> {
-                Loading(Modifier.fillMaxSize())
+                Loading()
             }
 
             is TrackListState.Error -> {

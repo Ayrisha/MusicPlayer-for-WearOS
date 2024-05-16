@@ -28,13 +28,9 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MenuScreen(navController: NavController, username: String? = "") {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val click = "menu"
 
     Scaffold(
         vignette = {
@@ -74,25 +70,6 @@ fun MenuScreen(navController: NavController, username: String? = "") {
                         navController,
                         "load_musics"
                     )
-                }
-            }
-        }
-    }
-
-    GlobalScope.launch  {
-        DataStoreManager.getInstance().isCompleted.collect { isCompleted ->
-            if (isCompleted) {
-                DataStoreManager.getInstance().isShow.collect { isShow ->
-                    if (!isShow) {
-                        val activity = context as Activity
-                        val intent = Intent(activity, ConfirmationActivity::class.java).apply {
-                            putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION)
-                            putExtra(ConfirmationActivity.EXTRA_MESSAGE, username)
-                            putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
-                        }
-                        activity.startActivity(intent)
-                        DataStoreManager.getInstance().updateIsShow(true)
-                    }
                 }
             }
         }

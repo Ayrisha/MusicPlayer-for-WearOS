@@ -106,7 +106,7 @@ fun PlaylistScreen(
                     }
                 }
                 is PlayListUiState.Loading -> item{
-                    Loading(Modifier.fillParentMaxSize())
+                    Loading()
                 }
                 is PlayListUiState.Success ->
                     itemsIndexed(playListUiState.plaLists, key = { _, item -> item.title }) { _, item ->

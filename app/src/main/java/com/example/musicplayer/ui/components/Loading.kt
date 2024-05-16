@@ -16,7 +16,6 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun Loading(
-    modifier: Modifier
 ) {
     val isLoading = remember { mutableStateOf(false) }
 
@@ -25,7 +24,7 @@ fun Loading(
     }
 
     Box(
-        modifier = modifier,
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         if (isLoading.value) {

@@ -8,13 +8,13 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.media3.exoplayer.scheduler.Scheduler
+import com.example.musicplayer.MusicApplication
 
 @androidx.annotation.OptIn(UnstableApi::class)
 class MediaDownloadServiceImpl : DownloadService(1) {
-    private lateinit var downloadManager: DownloadManager
     @SuppressLint("ServiceCast")
     override fun getDownloadManager(): DownloadManager {
-        return downloadManager
+        return (applicationContext as MusicApplication).container.downloadManager
     }
     override fun getScheduler(): Scheduler? {
         return null

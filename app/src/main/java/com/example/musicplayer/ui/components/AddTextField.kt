@@ -52,7 +52,6 @@ fun AddTextField(
             keyboardActions = KeyboardActions(
                 onDone = {
                     onSearchClicked(text)
-                    keyboardController?.hide()
                     navController.popBackStack("playlists", false)
                 }
             ),

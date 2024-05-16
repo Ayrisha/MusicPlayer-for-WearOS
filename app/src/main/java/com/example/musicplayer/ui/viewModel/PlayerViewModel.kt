@@ -1,14 +1,17 @@
 package com.example.musicplayer.ui.viewModel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.example.musicplayer.DefaultAppContainer
+import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -23,14 +26,18 @@ import kotlinx.coroutines.withContext
 class PlayerViewModel(
     private val player: MediaController,
     private val playerRepository: PlayerRepositoryImpl = PlayerRepositoryImpl(),
-    private val musicPlayerRepository: MusicPlayerRepository = DefaultAppContainer().musicPlayerRepository
+    context: Context
 ) : PlayerViewModel(playerRepository) {
 
     var likeState: LikeState by mutableStateOf(LikeState.Dislike)
+    private lateinit var musicPlayerRepository: MusicPlayerRepository
 
     init {
         viewModelScope.launch {
             playerRepository.connect(player) {}
+
+            val appContainer = (context.applicationContext as MusicApplication).container
+            musicPlayerRepository = appContainer.musicPlayerRepository
 
             player.currentMediaItem?.mediaId?.let { checkTrack(it) }
 
