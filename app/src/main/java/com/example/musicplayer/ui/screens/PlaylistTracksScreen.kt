@@ -1,11 +1,15 @@
 package com.example.musicplayer.ui.screens
 
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.session.MediaController
@@ -32,7 +36,6 @@ import com.example.musicplayer.ui.components.SwipeSongCard
 import com.example.musicplayer.ui.viewModel.PlaylistTracksViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
 
-@OptIn(ExperimentalWearFoundationApi::class)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun PlayListTracksScreen(
@@ -40,18 +43,25 @@ fun PlayListTracksScreen(
     mediaController: MediaController,
     navController: NavController
 ) {
+    val context = LocalContext.current
+
     val tracksViewModel: PlaylistTracksViewModel = viewModel(factory = PlaylistTracksViewModel.Factory)
 
     val songUiState = tracksViewModel.likeUiState
 
     val listState = rememberScalingLazyListState()
 
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
+        }
+    }
+
     tracksViewModel.getTracks(playlistName)
 
     Scaffold(
-        vignette = {
-            Vignette(vignettePosition = VignettePosition.Bottom)
-        },
         positionIndicator = {
             PositionIndicator(listState)
         },

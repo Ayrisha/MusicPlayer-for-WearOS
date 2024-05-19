@@ -17,8 +17,6 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,19 +59,19 @@ fun AuthScreen(
 
                         Log.d(
                             "GoogleSignInActivity",
-                            "IdToken:${account.serverAuthCode}"
+                            "serverAuthCode:${account.serverAuthCode}"
                         )
 
                         account.idToken?.let {
                             val appContainer = (context.applicationContext as MusicApplication).container
-                            appContainer.basicAuthInterceptor.setToken(it)
+                            appContainer.authInterceptor.setToken(it)
                         }
 
                         val displayName = Uri.encode(account.displayName ?: "")
                         val email = Uri.encode(account.email ?: "")
                         val photoUrl = Uri.encode(account.photoUrl?.toString() ?: "")
 
-                        navController.navigate("confirmation/$displayName/$email/$photoUrl")
+                        navController.navigate("confirmation/$displayName/$email/$photoUrl/${account.idToken}")
 
                     } catch (e: ApiException) {
                         Log.w("GoogleSignInActivity", "signInResult:failed code=${e.statusCode}")

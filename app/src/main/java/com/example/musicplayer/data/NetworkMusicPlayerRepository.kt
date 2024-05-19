@@ -3,6 +3,7 @@ package com.example.musicplayer.data
 import com.example.musicplayer.data.model.PlayList
 import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.data.network.MusicService
+import com.example.musicplayer.data.network.model.Tokens
 
 class NetworkMusicPlayerRepository(
     private val musicService: MusicService
@@ -95,4 +96,6 @@ class NetworkMusicPlayerRepository(
     override suspend fun deletePlayListTrack(title: String, trackId: String) {
         musicService.deletePlayListTrack(title, trackId)
     }
+
+    override suspend fun auth(): Tokens = musicService.auth()
 }

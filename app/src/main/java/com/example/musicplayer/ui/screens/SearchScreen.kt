@@ -1,27 +1,57 @@
 package com.example.musicplayer.ui.screens
 
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresExtension
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.dynamicanimation.animation.DynamicAnimation
+import androidx.dynamicanimation.animation.FlingAnimation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
+import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
+import androidx.wear.compose.foundation.lazy.AutoCenteringParams
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.foundation.rememberActiveFocusRequester
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.ListHeader
@@ -36,16 +66,28 @@ import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.Loading
 import com.example.musicplayer.ui.components.SongCard
+import com.example.musicplayer.ui.viewModel.SongCardViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackUiState
+import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.compose.rotaryinput.ScalingLazyColumnRotaryScrollAdapter
+import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun SearchScreen(
     mediaController: MediaController,
     navController: NavController
 ) {
+    val context = LocalContext.current
+
     val trackViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
+
+    val songCardViewModel: SongCardViewModel = viewModel()
+
+    val tracks = songCardViewModel.tracks
 
     val songUiState = trackViewModel.trackUiState
 
@@ -53,20 +95,34 @@ fun SearchScreen(
 
     val listState = rememberScalingLazyListState()
 
-    val stateHeader = mutableStateOf("Популярные треки")
-
     val searchQuery =
         navController.currentBackStackEntry?.savedStateHandle?.get<String>("search_query")
 
-    val searchQueryState = remember {
-        mutableStateOf(searchQuery)
+    val stateHeader = remember {
+        mutableStateOf("Популярные треки")}
+
+    val focusRequester = rememberActiveFocusRequester()
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val rotaryScrollAdapter = ScalingLazyColumnRotaryScrollAdapter(listState)
+
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
+        }
     }
 
-    if (searchQuery != null) {
-        stateHeader.value = searchQuery
-        trackViewModel.searchTrack(searchQuery)
-    }else{
-        trackViewModel.popularTrack()
+    LaunchedEffect(searchQuery) {
+        if (searchQuery != null) {
+            trackViewModel.searchTrack(searchQuery)
+            stateHeader.value = searchQuery
+        } else {
+            trackViewModel.popularTrack()
+            stateHeader.value = "Популярные треки"
+        }
     }
 
     Scaffold(
@@ -75,13 +131,24 @@ fun SearchScreen(
         },
         timeText = { TimeText(modifier = Modifier.scrollAway(listState)) }
     ) {
+
         ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .onRotaryScrollEvent {
+                    coroutineScope.launch {
+                        listState.scrollBy(it.verticalScrollPixels)
+                        listState.animateScrollBy(0f)
+                    }
+                    true
+                }
+                .rotaryWithSnap(
+                    rotaryScrollAdapter = rotaryScrollAdapter
+                )
+                .focusRequester(focusRequester)
+                .focusable(),
             state = listState,
-            flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
-                state = listState
-            )
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
                 Button(
@@ -109,21 +176,22 @@ fun SearchScreen(
                 ListHeader {
                     Text(
                         text = stateHeader.value,
-                        textAlign = TextAlign.Center)
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
             when (songUiState) {
                 is TrackUiState.Start -> {
-                    stateHeader.value = "Популярные треки"
+                    songCardViewModel.loadTracks(songUiState.trackPopular)
                     itemsIndexed(
-                        songUiState.trackPopular
+                        tracks
                     ) { index, item ->
                         SongCard(
                             title = item.title,
                             artist = item.artist,
                             img = item.imgLink,
                             onClick = {
-                                mediaManager.setMediaItems(songUiState.trackPopular, index)
+                                mediaManager.setMediaItems(tracks, index)
                                 navController.navigate("play_screen")
                             }
                         )
@@ -131,13 +199,14 @@ fun SearchScreen(
                 }
 
                 is TrackUiState.Success -> {
-                    itemsIndexed(songUiState.trackSearches) { index, item ->
+                    songCardViewModel.loadTracks(songUiState.trackSearches)
+                    itemsIndexed(tracks) { index, item ->
                         SongCard(
                             title = item.title,
                             artist = item.artist,
                             img = item.imgLink,
                             onClick = {
-                                mediaManager.setMediaItems(songUiState.trackSearches, index)
+                                mediaManager.setMediaItems(tracks, index)
                                 navController.navigate("play_screen")
                             }
                         )
@@ -154,11 +223,8 @@ fun SearchScreen(
                         Retry(
                             retryAction = {
                                 if (searchQuery != null) {
-                                    searchQueryState.value?.let {
                                         trackViewModel.searchTrack(
-                                            it
-                                        )
-                                    }
+                                            searchQuery)
                                 } else {
                                     trackViewModel.popularTrack()
                                 }
@@ -167,5 +233,9 @@ fun SearchScreen(
                 }
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
 }

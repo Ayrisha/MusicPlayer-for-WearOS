@@ -1,25 +1,35 @@
 package com.example.musicplayer.ui.screens
 
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.wear.compose.foundation.edgeSwipeToDismiss
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.ListHeader
@@ -44,6 +54,8 @@ fun PlaylistScreen(
     navController: NavController,
     trackId: String? = null
 ) {
+    val context = LocalContext.current
+
     val playListViewModel: PlayListViewModel = viewModel(factory = PlayListViewModel.Factory)
 
     val listState = rememberScalingLazyListState()
@@ -52,10 +64,15 @@ fun PlaylistScreen(
 
     playListViewModel.getPlaylists()
 
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
+        }
+    }
+
     Scaffold(
-        vignette = {
-            Vignette(vignettePosition = VignettePosition.Bottom)
-        },
         positionIndicator = {
             PositionIndicator(listState)
         },
@@ -109,14 +126,15 @@ fun PlaylistScreen(
                     Loading()
                 }
                 is PlayListUiState.Success ->
-                    itemsIndexed(playListUiState.plaLists, key = { _, item -> item.title }) { _, item ->
+                    itemsIndexed(playListUiState.plaLists, key = { index, _ -> index }) { _, item ->
                         PlayListChip(
                             text = item.title,
                             navController = navController,
                             trackId = trackId,
                             onSwipe = {
                                 playListViewModel.deletePlaylist(item.title)
-                            })
+                            }
+                        )
                 }
             }
         }

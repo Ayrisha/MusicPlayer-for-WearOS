@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,20 +25,43 @@ import androidx.wear.compose.material.dialog.Confirmation
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun ConfirmationCard(
     navController: NavController,
     displayName: String?,
     email: String?,
-    urlPhoto: String?
+    urlPhoto: String?,
+    idToken: String?
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Confirmation(
         onTimeout = {
-            navController.navigate("menu") {
-                popUpTo("auth") {
-                    inclusive = true
+            coroutineScope.launch{
+                val application = context.applicationContext as MusicApplication
+                val musicRepository = application.container.musicPlayerRepository
+                if (idToken != null) {
+                    application.container.authInterceptor.setToken(idToken)
+                }
+                val tokens = musicRepository.auth()
+
+                application.container.dataStore.updateRefreshToken(tokens.refreshToken)
+                application.container.dataStore.updateAccessToken(tokens.accessToken)
+
+                Log.d("idToken", idToken.toString())
+                Log.d("accessToken", tokens.accessToken)
+                Log.d("refreshToken", tokens.refreshToken)
+
+                application.container.authInterceptor.setToken(tokens.accessToken)
+
+                navController.navigate("menu") {
+                    popUpTo("auth") {
+                        inclusive = true
+                    }
                 }
             }
         },

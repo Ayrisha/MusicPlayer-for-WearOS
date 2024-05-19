@@ -2,6 +2,7 @@ package com.example.musicplayer.ui.screens
 
 import android.content.Context
 import android.os.Build
+import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresExtension
 import androidx.compose.material.icons.Icons
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -41,13 +43,24 @@ fun  PlayScreen(
     playerViewModel: PlayerViewModel,
 ) {
     val context = LocalContext.current
+
     val volumeViewModel = createVolumeViewModel(context)
 
     val likeState: LikeState by mutableStateOf(playerViewModel.likeState)
 
     val downloadManager = (context.applicationContext as MusicApplication).container.downloadManager
 
-    val downloadTracker = DownloadTracker(downloadManager)
+    val downloadManagerImpl = (context.applicationContext as MusicApplication).container.downloadManagerImpl
+
+    val downloadTracker = DownloadTracker(downloadManagerImpl.cache, downloadManager)
+
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
+        }
+    }
 
     PlayerScreen(
         playerViewModel = playerViewModel,
@@ -55,13 +68,19 @@ fun  PlayScreen(
         buttons = {
             IconButton(
                 onClick = {
-                    controller.currentMediaItem?.mediaMetadata?.artworkUri?.let { it1 ->
-                        controller.currentMediaItem?.mediaId?.let { it2 ->
-                            downloadTracker.addDownload(
-                                it1,
-                                it2,
-                                context)
-                        }
+                    Log.d("PlayerScreen", "onClick")
+                    Log.d("artworkUri",
+                        controller.currentMediaItem?.mediaMetadata?.artworkUri.toString()
+                    )
+                    Log.d("mediaId",
+                        controller.currentMediaItem?.mediaId.toString()
+                    )
+                    controller.currentMediaItem?.let { it1 ->
+                        downloadTracker.addDownload(
+                            url = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/${controller.currentMediaItem?.mediaId}.mp3",
+                            id = it1.mediaId,
+                            context = context
+                        )
                     }
                 }) {
                 Icon(

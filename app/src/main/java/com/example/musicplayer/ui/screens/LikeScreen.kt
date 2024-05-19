@@ -1,19 +1,24 @@
 package com.example.musicplayer.ui.screens
 
+import android.content.Context
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.RevealValue
-import androidx.wear.compose.foundation.SwipeToDismissBox
+
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
@@ -34,6 +39,7 @@ import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.components.SwipeSongCard
 import com.example.musicplayer.ui.viewModel.LikeViewModel
+import com.example.musicplayer.ui.viewModel.SongCardViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
 import kotlinx.coroutines.delay
 
@@ -43,18 +49,28 @@ fun LikeScreen(
     mediaController: MediaController,
     navController: NavController
 ) {
+    val context = LocalContext.current
     val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
 
     val songUiState = likeViewModel.likeUiState
+
+    val songCardViewModel: SongCardViewModel = viewModel()
+
+    val tracks = songCardViewModel.tracks
 
     val listState = rememberScalingLazyListState()
 
     likeViewModel.getTracksLike()
 
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
+        }
+    }
+
         Scaffold(
-            vignette = {
-                Vignette(vignettePosition = VignettePosition.Bottom)
-            },
             positionIndicator = {
                 PositionIndicator(listState)
             },
@@ -74,8 +90,9 @@ fun LikeScreen(
                     }
                 }
                 when (songUiState) {
-                    is TrackListState.Success ->
-                        itemsIndexed(songUiState.tracks) { index, item ->
+                    is TrackListState.Success -> {
+                        songCardViewModel.loadTracks(songUiState.tracks)
+                        itemsIndexed(tracks) { index, item ->
                             SwipeSongCard(
                                 index = index,
                                 mediaController = mediaController,
@@ -90,6 +107,7 @@ fun LikeScreen(
                                 }
                             )
                         }
+                    }
 
                     is TrackListState.Empty -> item {
                         EmptyBox("Нет избранных")

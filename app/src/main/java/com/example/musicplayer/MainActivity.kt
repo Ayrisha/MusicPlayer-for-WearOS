@@ -8,8 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -20,7 +20,6 @@ import androidx.navigation.navigation
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import com.example.musicplayer.datastore.DataStoreManager
 import com.example.musicplayer.media.PlaybackService
 import com.example.musicplayer.ui.components.ConfirmationCard
 import com.example.musicplayer.ui.screens.AddPlayListScreen
@@ -36,7 +35,9 @@ import com.example.musicplayer.ui.screens.SearchScreen
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 
 @UnstableApi
 class MainActivity : ComponentActivity() {
@@ -49,6 +50,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val application = applicationContext as MusicApplication
+        val dataStore = application.container.dataStore
+
         val sessionToken =
             SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
@@ -58,9 +62,30 @@ class MainActivity : ComponentActivity() {
             mediaController = controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
-
         setContent {
             val navController = rememberSwipeDismissableNavController()
+
+            LaunchedEffect(Unit) {
+                val accessToken = dataStore.accessToken.firstOrNull()
+
+                Log.d("MainActivity", "Get access token from Datastore: $accessToken")
+
+                if (accessToken != null) {
+                    navController.navigate("menu") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                } else {
+                    navController.navigate("auth") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+            }
 
             SwipeDismissableNavHost(navController = navController, startDestination = "auth"){
                 navigation(
@@ -71,17 +96,19 @@ class MainActivity : ComponentActivity() {
                         AuthScreen(navController)
                     }
                     composable(
-                        "confirmation/{displayName}/{email}/{photoUrl}",
+                        "confirmation/{displayName}/{email}/{photoUrl}/{idToken}",
                         arguments = listOf(
                             navArgument("displayName") { type = NavType.StringType },
                             navArgument("email") { type = NavType.StringType },
-                            navArgument("photoUrl") { type = NavType.StringType }
+                            navArgument("photoUrl") { type = NavType.StringType },
+                            navArgument("idToken") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
                         val displayName = backStackEntry.arguments?.getString("displayName")
                         val email = backStackEntry.arguments?.getString("email")
                         val photoUrl = backStackEntry.arguments?.getString("photoUrl")
-                        ConfirmationCard(navController, displayName, email, photoUrl)
+                        val idToken = backStackEntry.arguments?.getString("idToken")
+                        ConfirmationCard(navController, displayName, email, photoUrl, idToken)
                     }
                 }
                 navigation(
@@ -132,13 +159,12 @@ class MainActivity : ComponentActivity() {
                         playlistname?.let { it1 -> PlayListTracksScreen(it1, mediaController, navController) }
                     }
                     composable("load_musics") {
-                        LoadMusicScreen()
+                        LoadMusicScreen(context = LocalContext.current)
                     }
                     composable(
                         route = "play_screen"
                     ) {
-                        val context = LocalContext.current
-                        val playerViewModel = PlayerViewModel(mediaController, context = context)
+                        val playerViewModel = PlayerViewModel(mediaController, context = LocalContext.current)
                         PlayScreen(navController, mediaController, playerViewModel)
                     }
                 }

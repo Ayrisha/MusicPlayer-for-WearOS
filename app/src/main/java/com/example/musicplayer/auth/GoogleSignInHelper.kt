@@ -28,7 +28,6 @@ class GoogleSignInHelper(private val context: Context) {
     }
 
     fun signIn(googleSignInLauncher: ActivityResultLauncher<Intent>) {
-        googleSignInClient.signOut()
         val signInIntent = googleSignInClient.signInIntent
         googleSignInLauncher.launch(signInIntent)
     }

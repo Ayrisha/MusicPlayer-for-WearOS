@@ -48,7 +48,9 @@ fun SwipeSongCard(
     onSwipe: () -> Unit
 ){
     val mediaManager = MediaManager(mediaController)
+
     val coroutineScope = rememberCoroutineScope()
+
     val revealState = rememberRevealState()
 
     SwipeToRevealChip(

@@ -11,6 +11,7 @@ import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
+import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import java.io.File
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -20,10 +21,12 @@ class DownloadManagerImpl(
     context: Context
 ) {
     val downloadManager: DownloadManager
+    val cache: SimpleCache
 
     init {
         val databaseProvider = StandaloneDatabaseProvider(context)
         val downloadCache = getSimpleCache(context, databaseProvider)
+        cache = getSimpleCache(context, databaseProvider)
         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
 
         val downloadExecutor = Executors.newFixedThreadPool(3)
@@ -51,5 +54,11 @@ class DownloadManagerImpl(
                 ).also { simpleCache = it }
             }
         }
+    }
+
+    @OptIn(ExperimentalHorologistApi::class)
+    fun getDownloadedTracks(context: Context): List<DownloadedTrack> {
+        val tracker = DownloadTracker(cache, downloadManager)
+        return tracker.getDownloadedTracks()
     }
 }

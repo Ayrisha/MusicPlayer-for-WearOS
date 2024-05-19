@@ -1,8 +1,6 @@
 package com.example.musicplayer.ui.screens
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,32 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.wear.activity.ConfirmationActivity
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.TimeText
-import androidx.wear.compose.material.Vignette
-import androidx.wear.compose.material.VignettePosition
 import com.example.musicplayer.R
-import com.example.musicplayer.datastore.DataStoreManager
 import com.example.musicplayer.ui.components.MenuItem
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MenuScreen(navController: NavController, username: String? = "") {
 
     Scaffold(
-        vignette = {
-            Vignette(vignettePosition = VignettePosition.TopAndBottom)
-        },
         timeText = { TimeText() }
     ) {
         Box(
