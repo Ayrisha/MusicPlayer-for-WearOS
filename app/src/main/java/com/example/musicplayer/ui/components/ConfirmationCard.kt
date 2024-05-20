@@ -42,19 +42,26 @@ fun ConfirmationCard(
     Confirmation(
         onTimeout = {
             coroutineScope.launch{
+                Log.d("ConfirmationCard", "IDToken: ${idToken.toString()}")
+
                 val application = context.applicationContext as MusicApplication
+
                 val musicRepository = application.container.musicPlayerRepository
+
                 if (idToken != null) {
+                    Log.d("ConfirmationCard", "Set token IDToken: $idToken")
                     application.container.authInterceptor.setToken(idToken)
                 }
-                val tokens = musicRepository.auth()
 
+                val tokens =
+                    musicRepository.auth().also { authTokens ->
+                        Log.d("AuthInterceptor", "Received tokens: $authTokens")
+                    }
+
+
+                Log.d("ConfirmationCard token save", "Refresh Token: ${tokens.refreshToken}, Access Token: ${tokens.accessToken}")
                 application.container.dataStore.updateRefreshToken(tokens.refreshToken)
                 application.container.dataStore.updateAccessToken(tokens.accessToken)
-
-                Log.d("idToken", idToken.toString())
-                Log.d("accessToken", tokens.accessToken)
-                Log.d("refreshToken", tokens.refreshToken)
 
                 application.container.authInterceptor.setToken(tokens.accessToken)
 

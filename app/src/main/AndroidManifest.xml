@@ -74,6 +74,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="androidx.wear.activity.ConfirmationActivity"
+            android:taskAffinity="">
+        </activity>
+
     </application>
 
 </manifest>

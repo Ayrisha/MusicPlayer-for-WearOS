@@ -1,7 +1,9 @@
 package com.example.musicplayer.ui.components
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import kotlin.Result
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
@@ -20,9 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.activity.ConfirmationActivity
@@ -36,7 +40,6 @@ import androidx.wear.compose.material.SwipeToRevealActionColors
 import androidx.wear.compose.material.SwipeToRevealChip
 import androidx.wear.compose.material.SwipeToRevealDefaults
 import com.example.musicplayer.R
-import com.example.musicplayer.ui.viewModel.PlayListViewModel
 import com.example.musicplayer.ui.viewModel.PlaylistTracksViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -55,6 +58,7 @@ fun PlayListChip(
     val context = LocalContext.current
     val revealState = rememberRevealState()
     val coroutineScope = rememberCoroutineScope()
+    val owner: LifecycleOwner = LocalLifecycleOwner.current
 
     SwipeToRevealChip(
         action = SwipeToRevealDefaults.action(
@@ -87,17 +91,45 @@ fun PlayListChip(
             onClick = {
                 if (trackId != null) {
                     tracksViewModel.setTrack(text, trackId)
-                    val activity = context as Activity
-                    val intent = Intent(activity, ConfirmationActivity::class.java).apply {
-                        putExtra(
-                            ConfirmationActivity.EXTRA_ANIMATION_TYPE,
-                            ConfirmationActivity.SUCCESS_ANIMATION
-                        )
-                        putExtra(ConfirmationActivity.EXTRA_MESSAGE, "Песня добавлена")
-                        putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
+
+                    tracksViewModel.addTrackResult.observe(owner) { result ->
+                        result.onSuccess { _ ->
+                            val intent =
+                                Intent(context, ConfirmationActivity::class.java).apply {
+                                    putExtra(
+                                        ConfirmationActivity.EXTRA_ANIMATION_TYPE,
+                                        ConfirmationActivity.SUCCESS_ANIMATION
+                                    )
+                                    putExtra(
+                                        ConfirmationActivity.EXTRA_MESSAGE,
+                                        "Песня добавлена"
+                                    )
+                                    putExtra(
+                                        ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS,
+                                        2000
+                                    )
+                                }
+                            context.startActivity(intent)
+                        }.onFailure { _ ->
+                            val intent =
+                                Intent(context, ConfirmationActivity::class.java).apply {
+                                    putExtra(
+                                        ConfirmationActivity.EXTRA_ANIMATION_TYPE,
+                                        ConfirmationActivity.FAILURE_ANIMATION
+                                    )
+                                    putExtra(
+                                        ConfirmationActivity.EXTRA_MESSAGE,
+                                        "Песня уже есть в \"$text\""
+                                    )
+                                    putExtra(
+                                        ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS,
+                                        2000
+                                    )
+                                }
+                            context.startActivity(intent)
+                        }
+                        navController.popBackStack("play_screen", false)
                     }
-                    activity.startActivity(intent)
-                    navController.popBackStack("play_screen", false)
                 } else {
                     navController.navigate("playlisttracks/$text")
                 }
@@ -133,4 +165,14 @@ fun PlayListChip(
             }
         }
     }
+}
+
+private fun startConfirmationActivity(animationType: Int, message: String, context: Context) {
+    val activity = context as Activity
+    val intent = Intent(activity, ConfirmationActivity::class.java).apply {
+        putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, animationType)
+        putExtra(ConfirmationActivity.EXTRA_MESSAGE, message)
+        putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
+    }
+    activity.startActivity(intent)
 }

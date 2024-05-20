@@ -6,7 +6,7 @@ import com.example.musicplayer.data.network.MusicService
 import com.example.musicplayer.data.network.model.Tokens
 
 class NetworkMusicPlayerRepository(
-    private val musicService: MusicService
+    private var musicService: MusicService
 ): MusicPlayerRepository{
     override suspend fun searchTrack(
         title: String
@@ -98,4 +98,8 @@ class NetworkMusicPlayerRepository(
     }
 
     override suspend fun auth(): Tokens = musicService.auth()
+
+    fun updateRetrofitService(newService: MusicService) {
+        musicService = newService
+    }
 }

@@ -1,10 +1,19 @@
 package com.example.musicplayer.auth
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.rememberCoroutineScope
 import com.example.musicplayer.data.MusicPlayerRepository
+import com.example.musicplayer.data.network.model.Tokens
 import com.example.musicplayer.datastore.MyDataStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -14,34 +23,56 @@ class TokenAuthenticator(
     private val musicRepository: MusicPlayerRepository,
     private val authenticator: AuthInterceptor,
     private val dataStore: MyDataStore
-) : Authenticator{
+) : Authenticator {
+
+    private val _requiresAuthFlow = MutableStateFlow(false)
+    val requiresAuthFlow: StateFlow<Boolean> = _requiresAuthFlow.asStateFlow()
+
     override fun authenticate(route: Route?, response: Response): Request? {
         if (response.code == 401 || response.code == 403) {
-
             val refreshToken = runBlocking {
                 dataStore.refreshToken.firstOrNull()
             }
 
-            Log.d("TokenAuthenticator", "Get refreshToken from Datastore: $refreshToken")
-
-            if (refreshToken != null) {
-                authenticator.setToken(refreshToken)
+            val accessToken = runBlocking {
+                dataStore.accessToken.firstOrNull()
             }
 
-            val tokens = runBlocking { musicRepository.auth()}
+            Log.d("TokenAuthenticator", "Get refreshToken before update: $refreshToken")
+            Log.d("TokenAuthenticator", "Get accessToken before update: $accessToken")
 
-            Log.d("accessToken", tokens.accessToken)
-            Log.d("refreshToken", tokens.refreshToken)
-
-            runBlocking{
-                dataStore.updateRefreshToken(tokens.refreshToken)
-                dataStore.updateAccessToken(tokens.accessToken)
+            if (refreshToken == null) {
+                _requiresAuthFlow.value = true
+                return null
             }
 
-            authenticator.setToken(tokens.accessToken)
+            authenticator.setToken(refreshToken)
 
+            var newToken = ""
+
+            runBlocking {
+                try {
+                    val tokens = musicRepository.auth()
+                    Log.d("TokenAuthenticator", "Get refreshToken after update: ${tokens.refreshToken}")
+                    Log.d("TokenAuthenticator", "Get accessToken after update: ${tokens.accessToken}")
+
+                    newToken = tokens.accessToken
+
+                    dataStore.updateAccessToken(tokens.accessToken)
+
+                    withContext(Dispatchers.Main) {
+                        authenticator.setToken(tokens.accessToken)
+
+                        response.request.newBuilder()
+                            .header("Authorization", "Bearer ${tokens.accessToken}")
+                            .build()
+                    }
+                } catch (e: Exception) {
+                    Log.e("TokenAuthenticator", "Error refreshing tokens: ${e.message}")
+                }
+            }
             return response.request.newBuilder()
-                .header("Authorization", "Bearer ${tokens.accessToken}")
+                .header("Authorization", "Bearer $newToken")
                 .build()
         }
         return null

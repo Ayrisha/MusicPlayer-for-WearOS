@@ -6,6 +6,8 @@ import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -21,6 +23,9 @@ class PlaylistTracksViewModel (
     private val musicPlayerRepository: MusicPlayerRepository
 ): ViewModel(){
     var likeUiState: TrackListState by mutableStateOf(TrackListState.Loading)
+
+    private val _addTrackResult = MutableLiveData<Result<String>>()
+    val addTrackResult: LiveData<Result<String>> = _addTrackResult
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getTracks(title:String){
@@ -42,9 +47,14 @@ class PlaylistTracksViewModel (
         }
     }
 
-    fun setTrack(title:String, trackId: String){
+    fun setTrack(title: String, trackId: String) {
         viewModelScope.launch {
-            musicPlayerRepository.setPlayListTrack(title, trackId)
+            try {
+                musicPlayerRepository.setPlayListTrack(title, trackId)
+                _addTrackResult.value = Result.success("ok")
+            } catch (e: Exception) {
+                _addTrackResult.value = Result.failure(e)
+            }
         }
     }
 

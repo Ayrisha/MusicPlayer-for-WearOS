@@ -37,34 +37,45 @@ class DefaultAppContainer(context: Context) : AppContainer {
     override val downloadManager = DownloadManagerImpl(context).downloadManager
     override val downloadManagerImpl = DownloadManagerImpl(context)
 
-    override val musicPlayerRepository: MusicPlayerRepository by lazy {
-        NetworkMusicPlayerRepository(retrofitService)
-    }
-
-    override val tokenAuthenticator: TokenAuthenticator by lazy {
-        TokenAuthenticator(musicPlayerRepository, authInterceptor, dataStore)
-    }
-
     private val logging: HttpLoggingInterceptor = HttpLoggingInterceptor()
         .setLevel(HttpLoggingInterceptor.Level.BODY)
 
-    private val httpClient: OkHttpClient.Builder by lazy {
-        OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .authenticator(tokenAuthenticator)
-            .addInterceptor(authInterceptor)
-    }
+    private val initialHttpClient: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .addInterceptor(authInterceptor)
+        .build()
 
-    private val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(BASE_URL)
-            .client(httpClient.build())
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .addConverterFactory(GsonConverterFactory.create())
+        .baseUrl(BASE_URL)
+        .client(initialHttpClient)
+        .build()
+
+    private val retrofitService: MusicService = retrofit.create(MusicService::class.java)
+
+    override val musicPlayerRepository: MusicPlayerRepository = NetworkMusicPlayerRepository(retrofitService)
+
+    override val tokenAuthenticator: TokenAuthenticator = TokenAuthenticator(musicPlayerRepository, authInterceptor, dataStore)
+
+    private val authenticatedHttpClient: OkHttpClient by lazy {
+        initialHttpClient.newBuilder()
+            .addInterceptor(logging)
+            .addInterceptor(authInterceptor)
+            .authenticator(tokenAuthenticator)
             .build()
     }
 
-    private val retrofitService: MusicService by lazy {
-        retrofit.create(MusicService::class.java)
+    init {
+        updateRetrofitClient()
     }
 
+    private fun updateRetrofitClient() {
+        val newRetrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(BASE_URL)
+            .client(authenticatedHttpClient)
+            .build()
+
+        (musicPlayerRepository as NetworkMusicPlayerRepository).updateRetrofitService(newRetrofit.create(MusicService::class.java))
+    }
 }

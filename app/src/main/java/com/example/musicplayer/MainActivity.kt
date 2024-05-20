@@ -8,7 +8,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -20,6 +23,7 @@ import androidx.navigation.navigation
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.example.musicplayer.auth.TokenAuthenticator
 import com.example.musicplayer.media.PlaybackService
 import com.example.musicplayer.ui.components.ConfirmationCard
 import com.example.musicplayer.ui.screens.AddPlayListScreen
@@ -35,8 +39,11 @@ import com.example.musicplayer.ui.screens.SearchScreen
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @UnstableApi
@@ -64,20 +71,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberSwipeDismissableNavController()
+            val requiresAuth by application.container.tokenAuthenticator.requiresAuthFlow.collectAsState()
 
-            LaunchedEffect(Unit) {
-                val accessToken = dataStore.accessToken.firstOrNull()
+            Log.d("MainActivity", "$requiresAuth")
 
-                Log.d("MainActivity", "Get access token from Datastore: $accessToken")
-
-                if (accessToken != null) {
-                    navController.navigate("menu") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                } else {
+            LaunchedEffect(requiresAuth) {
+                if (requiresAuth) {
                     navController.navigate("auth") {
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = true
@@ -87,7 +86,33 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            SwipeDismissableNavHost(navController = navController, startDestination = "auth"){
+            LaunchedEffect(Unit) {
+                val refreshToken = runBlocking { dataStore.refreshToken.firstOrNull() }
+
+                Log.d("MainActivity", "Get refresh token from Datastore: $refreshToken")
+
+                if (refreshToken == null) {
+                    navController.navigate("auth") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                } else {
+                    val accessToken = runBlocking { dataStore.accessToken.firstOrNull() }
+
+                    Log.d("MainActivity", "Get access token from Datastore: $accessToken")
+
+                        navController.navigate("menu") {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                }
+            }
+
+            SwipeDismissableNavHost(navController = navController, startDestination = "menu"){
                 navigation(
                     startDestination = "AuthScreen",
                     route = "auth"
