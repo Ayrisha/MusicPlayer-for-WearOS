@@ -38,97 +38,49 @@ import com.google.android.gms.common.api.ApiException
 fun AuthScreen(
     navController: NavController
 ) {
-    val context = LocalContext.current
-
-    val googleSignInHelper = GoogleSignInHelper(context)
-
     val listState = rememberLazyListState()
 
-    val googleSignInLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val data: Intent? = result.data
-                    val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-                    try {
-                        val account = task.getResult(ApiException::class.java)
-
-                        Log.d(
-                            "GoogleSignInActivity",
-                            "IdToken:${account.idToken}"
-                        )
-
-                        Log.d(
-                            "GoogleSignInActivity",
-                            "serverAuthCode:${account.serverAuthCode}"
-                        )
-
-                        account.idToken?.let {
-                            val appContainer = (context.applicationContext as MusicApplication).container
-                            appContainer.authInterceptor.setToken(it)
-                        }
-
-                        val displayName = Uri.encode(account.displayName ?: "")
-                        val email = Uri.encode(account.email ?: "")
-                        val photoUrl = Uri.encode(account.photoUrl?.toString() ?: "")
-
-                        navController.navigate("confirmation/$displayName/$email/$photoUrl/${account.idToken}")
-
-                    } catch (e: ApiException) {
-                        Log.w("GoogleSignInActivity", "signInResult:failed code=${e.statusCode}")
-                    }
-                } else {
-                    Log.w(
-                        "GoogleSignInActivity",
-                        "signInResult:cancelled resultCode=${result.resultCode}"
-                    )
-                }
-            }
-
-        Scaffold(
-            positionIndicator = {
-                PositionIndicator(lazyListState = listState)
-            }
+    Scaffold(
+        positionIndicator = {
+            PositionIndicator(lazyListState = listState)
+        }
+    ) {
+        LazyColumn(
+            state = listState,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            LazyColumn(
-                state = listState,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                item {
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
-                        text = "Зарегестрируйтесь,\n чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                item {
-                    CardSigIn(
-                        imageVector = Icons.Rounded.AccountCircle,
-                        text = "Войти через Google",
-                        onClick = {
-                            googleSignInHelper.signIn(googleSignInLauncher)
-                        },
-                        backgroundPainter = ColorPainter(Color(48, 79, 254))
-                    )
-                }
-                item {
-                    CardSigIn(
-                        imageVector = Icons.Rounded.Clear,
-                        text = "Продолжить без аккаунта",
-                        onClick = {
-                            navController.navigate("menu") {
-                                popUpTo("auth") {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
-                        padding = 20.dp
-                    )
-                }
+            item {
+                Text(
+                    modifier = Modifier
+                        .padding(top = 25.dp, start = 20.dp, end = 20.dp, bottom = 10.dp),
+                    text = "Зарегестрируйтесь,\n чтобы иметь возможность сохранять любимые треки и создавать плейлисты",
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
+            item {
+                CardSigIn(
+                    imageVector = Icons.Rounded.AccountCircle,
+                    text = "Войти через Google",
+                    onClick = {
+                        navController.navigate("AuthInfo")
+                    },
+                    backgroundPainter = ColorPainter(Color(48, 79, 254))
+                )
+            }
+            item {
+                CardSigIn(
+                    imageVector = Icons.Rounded.Clear,
+                    text = "Продолжить без аккаунта",
+                    onClick = {
+                        navController.navigate("menu")
+                    },
+                    backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
+                    padding = 20.dp
+                )
             }
         }
     }
+}
 

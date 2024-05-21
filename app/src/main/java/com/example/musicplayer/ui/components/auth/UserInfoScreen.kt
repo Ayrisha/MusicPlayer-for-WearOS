@@ -1,4 +1,4 @@
-package com.example.musicplayer.ui.components
+package com.example.musicplayer.ui.components.auth
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.dialog.Confirmation
+import androidx.wear.compose.material.dialog.DialogDefaults
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -30,19 +31,19 @@ import com.example.musicplayer.R
 import kotlinx.coroutines.launch
 
 @Composable
-fun ConfirmationCard(
-    navController: NavController,
+fun UserInfoScreen(
+    idToken: String?,
     displayName: String?,
     email: String?,
-    urlPhoto: String?,
-    idToken: String?
+    navController: NavController,
+    photoUrl: String?
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     Confirmation(
         onTimeout = {
             coroutineScope.launch{
-                Log.d("ConfirmationCard", "IDToken: ${idToken.toString()}")
+                Log.d("ConfirmationCard", "IDToken: ${idToken}")
 
                 val application = context.applicationContext as MusicApplication
 
@@ -73,7 +74,7 @@ fun ConfirmationCard(
             }
         },
         modifier = Modifier.fillMaxSize(),
-        durationMillis = 2000,
+        durationMillis = DialogDefaults.ShortDurationMillis,
         verticalArrangement = Arrangement.Center
     ) {
         Column(
@@ -83,7 +84,7 @@ fun ConfirmationCard(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(urlPhoto)
+                    .data(photoUrl)
                     .crossfade(true)
                     .diskCachePolicy(CachePolicy.ENABLED)
                     .build(),

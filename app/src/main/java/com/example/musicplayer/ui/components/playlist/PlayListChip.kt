@@ -1,9 +1,8 @@
-package com.example.musicplayer.ui.components
+package com.example.musicplayer.ui.components.playlist
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import kotlin.Result
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
@@ -165,14 +164,4 @@ fun PlayListChip(
             }
         }
     }
-}
-
-private fun startConfirmationActivity(animationType: Int, message: String, context: Context) {
-    val activity = context as Activity
-    val intent = Intent(activity, ConfirmationActivity::class.java).apply {
-        putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, animationType)
-        putExtra(ConfirmationActivity.EXTRA_MESSAGE, message)
-        putExtra(ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS, 2000)
-    }
-    activity.startActivity(intent)
 }

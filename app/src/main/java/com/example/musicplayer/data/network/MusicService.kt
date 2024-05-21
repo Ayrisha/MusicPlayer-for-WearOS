@@ -1,8 +1,7 @@
 package com.example.musicplayer.data.network;
 
-import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.data.network.model.PlayListInfo
-import com.example.musicplayer.data.network.model.Tokens
+import com.example.musicplayer.data.network.model.TokensInfo
 import com.example.musicplayer.data.network.model.TrackInfo
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -88,5 +87,5 @@ interface MusicService {
 
     @POST("/auth")
     suspend fun auth(
-    ):Tokens
+    ):TokensInfo
 }

@@ -2,7 +2,7 @@ package com.example.musicplayer.data.network.model
 
 import com.google.gson.annotations.SerializedName
 
-data class Tokens(
+data class TokensInfo(
     @SerializedName("accessToken") var accessToken: String,
     @SerializedName("refreshToken") var refreshToken: String
 )

@@ -1,9 +1,10 @@
 package com.example.musicplayer.data
 
 import com.example.musicplayer.data.model.PlayList
+import com.example.musicplayer.data.model.Tokens
 import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.data.network.MusicService
-import com.example.musicplayer.data.network.model.Tokens
+import com.example.musicplayer.data.network.model.TokensInfo
 
 class NetworkMusicPlayerRepository(
     private var musicService: MusicService
@@ -39,10 +40,6 @@ class NetworkMusicPlayerRepository(
 
     override suspend fun sedCode(code: String) {
         musicService.sendCode(code)
-    }
-
-    override suspend fun oauth(user: String) {
-        musicService.oauth(user)
     }
 
     override suspend fun getTracksLike(): List<Track> = musicService.getTracksLike().map { items ->
@@ -97,7 +94,9 @@ class NetworkMusicPlayerRepository(
         musicService.deletePlayListTrack(title, trackId)
     }
 
-    override suspend fun auth(): Tokens = musicService.auth()
+    override suspend fun auth(): Tokens = musicService.auth().let {
+        Tokens(it.accessToken, it.refreshToken)
+    }
 
     fun updateRetrofitService(newService: MusicService) {
         musicService = newService

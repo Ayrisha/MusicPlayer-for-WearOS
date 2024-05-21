@@ -10,6 +10,7 @@ class MusicApplication: Application() {
 
     @OptIn(UnstableApi::class) override fun onCreate() {
         super.onCreate()
+
         container = DefaultAppContainer(this)
     }
 }

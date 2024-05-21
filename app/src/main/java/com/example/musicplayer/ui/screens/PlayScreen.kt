@@ -25,7 +25,6 @@ import androidx.navigation.NavController
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
 import com.example.musicplayer.download.DownloadTracker
-import com.example.musicplayer.ui.components.PlayListChip
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -43,15 +42,10 @@ fun  PlayScreen(
     playerViewModel: PlayerViewModel,
 ) {
     val context = LocalContext.current
-
     val volumeViewModel = createVolumeViewModel(context)
-
     val likeState: LikeState by mutableStateOf(playerViewModel.likeState)
-
     val downloadManager = (context.applicationContext as MusicApplication).container.downloadManager
-
     val downloadManagerImpl = (context.applicationContext as MusicApplication).container.downloadManagerImpl
-
     val downloadTracker = DownloadTracker(downloadManagerImpl.cache, downloadManager)
 
     DisposableEffect(Unit) {

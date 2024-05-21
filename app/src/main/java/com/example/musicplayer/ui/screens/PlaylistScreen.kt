@@ -4,50 +4,39 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresExtension
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.wear.compose.foundation.edgeSwipeToDismiss
+import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
-import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
-import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ButtonDefaults
-import androidx.wear.compose.material.ListHeader
+import androidx.wear.compose.foundation.rememberActiveFocusRequester
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
-import androidx.wear.compose.material.TimeTextDefaults
-import androidx.wear.compose.material.Vignette
-import androidx.wear.compose.material.VignettePosition
 import androidx.wear.compose.material.scrollAway
-import com.example.musicplayer.ui.components.EmptyBox
-import com.example.musicplayer.ui.components.Loading
-import com.example.musicplayer.ui.components.PlayListChip
-import com.example.musicplayer.ui.components.Retry
+import com.example.musicplayer.ui.components.playlist.AddPlaylistButton
+import com.example.musicplayer.ui.components.playlist.PlaylistHeader
+import com.example.musicplayer.ui.components.playlist.playListUiStateContent
 import com.example.musicplayer.ui.viewModel.PlayListViewModel
-import com.example.musicplayer.ui.viewModel.state.PlayListUiState
+import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.compose.rotaryinput.ScalingLazyColumnRotaryScrollAdapter
+import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun PlaylistScreen(
@@ -55,22 +44,14 @@ fun PlaylistScreen(
     trackId: String? = null
 ) {
     val context = LocalContext.current
-
     val playListViewModel: PlayListViewModel = viewModel(factory = PlayListViewModel.Factory)
-
     val listState = rememberScalingLazyListState()
-
     val playListUiState = playListViewModel.playListUiState
+    val coroutineScope = rememberCoroutineScope()
+    val rotaryScrollAdapter = remember { ScalingLazyColumnRotaryScrollAdapter(listState) }
+    val focusRequester = rememberActiveFocusRequester()
 
     playListViewModel.getPlaylists()
-
-    DisposableEffect(Unit) {
-        onDispose {
-            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
-            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-            vibrator.vibrate(effect)
-        }
-    }
 
     Scaffold(
         positionIndicator = {
@@ -80,63 +61,41 @@ fun PlaylistScreen(
             modifier = Modifier.scrollAway(listState)) }
     ) {
         ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .onRotaryScrollEvent {
+                    coroutineScope.launch {
+                        listState.scrollBy(it.verticalScrollPixels)
+                        listState.animateScrollBy(0f)
+                    }
+                    true
+                }
+                .rotaryWithSnap(rotaryScrollAdapter = rotaryScrollAdapter)
+                .focusRequester(focusRequester)
+                .focusable(),
             state = listState,
-            flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(
-                state = listState
-            )
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Button(
-                    modifier = Modifier
-                        .size(ButtonDefaults.SmallButtonSize),
-                    onClick = {
-                        navController.navigate("addplaylist")
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(48, 79, 254)
-                    )
-                ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = "item image",
-                                tint = Color.White
-                            )
-                        }
-                }
-
+                AddPlaylistButton(navController = navController)
             }
             item {
-                ListHeader {
-                    Text(text = "Плейлисты")
-                }
+                PlaylistHeader()
             }
-            when (playListUiState) {
-                is PlayListUiState.Empty -> item { EmptyBox(text = "Нет плейлистов") }
-                is PlayListUiState.Error -> item {
-                    Retry {
-                        playListViewModel.getPlaylists()
-                    }
-                }
-                is PlayListUiState.Loading -> item{
-                    Loading()
-                }
-                is PlayListUiState.Success ->
-                    itemsIndexed(playListUiState.plaLists, key = { index, _ -> index }) { _, item ->
-                        PlayListChip(
-                            text = item.title,
-                            navController = navController,
-                            trackId = trackId,
-                            onSwipe = {
-                                playListViewModel.deletePlaylist(item.title)
-                            }
-                        )
-                }
-            }
+            playListUiStateContent(
+                playListUiState = playListUiState,
+                playListViewModel = playListViewModel,
+                navController = navController,
+                trackId = trackId
+            )
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
         }
     }
 }

@@ -44,20 +44,9 @@ fun PlayListTracksScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-
     val tracksViewModel: PlaylistTracksViewModel = viewModel(factory = PlaylistTracksViewModel.Factory)
-
     val songUiState = tracksViewModel.likeUiState
-
     val listState = rememberScalingLazyListState()
-
-    DisposableEffect(Unit) {
-        onDispose {
-            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
-            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-            vibrator.vibrate(effect)
-        }
-    }
 
     tracksViewModel.getTracks(playlistName)
 
@@ -116,4 +105,13 @@ fun PlayListTracksScreen(
 
         }
     }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            val vibrator: Vibrator = context.getSystemService(Vibrator::class.java)
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibrator.vibrate(effect)
+        }
+    }
+
 }

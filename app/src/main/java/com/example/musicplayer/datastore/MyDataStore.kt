@@ -20,7 +20,6 @@ class MyDataStore(
     val recentSearches: Flow<List<String>> = myDataStore.data
         .map { preferences ->
             val searches = preferences[PreferencesKeys.RECENT_SEARCHES_KEY]
-            Log.d("MyDataStore", "Loaded searches: $searches")
             searches?.split(";")?.map { it.trim() } ?: emptyList()
         }
 
@@ -34,15 +33,6 @@ class MyDataStore(
             preferences[PreferencesKeys.ACCESS_TOKEN_KEY]
         }
 
-    val isCompleted: Flow<Boolean> = myDataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.IS_COMPLETED_KEY] ?: false
-        }
-
-    val isShow: Flow<Boolean> = myDataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.IS_SHOW] ?: false
-        }
 
     suspend fun updateRecentSearches(searches: List<String>) {
         try {
@@ -60,18 +50,6 @@ class MyDataStore(
         }
     }
 
-    suspend fun updateIsCompleted(isCompleted: Boolean){
-        myDataStore.edit { preferences ->
-            preferences[PreferencesKeys.IS_COMPLETED_KEY] = isCompleted
-        }
-    }
-
-    suspend fun updateIsShow(isShow: Boolean){
-        myDataStore.edit { preferences ->
-            preferences[PreferencesKeys.IS_SHOW] = isShow
-        }
-    }
-
     suspend fun updateRefreshToken(refreshToken: String) {
         myDataStore.edit { preferences ->
             preferences[PreferencesKeys.REFRESH_TOKEN_KEY] = refreshToken
@@ -81,6 +59,13 @@ class MyDataStore(
     suspend fun updateAccessToken(accessToken: String) {
         myDataStore.edit { preferences ->
             preferences[PreferencesKeys.ACCESS_TOKEN_KEY] = accessToken
+        }
+    }
+
+    suspend fun clearTokens() {
+        myDataStore.edit { preferences ->
+            preferences.remove(PreferencesKeys.REFRESH_TOKEN_KEY)
+            preferences.remove(PreferencesKeys.ACCESS_TOKEN_KEY)
         }
     }
 }
