@@ -4,10 +4,12 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresExtension
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,12 +48,15 @@ import com.google.android.horologist.compose.rotaryinput.ScalingLazyColumnRotary
 import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class)
+@OptIn(ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class,
+    ExperimentalFoundationApi::class
+)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun LikeScreen(
     mediaController: MediaController,
-    navController: NavController
+    navController: NavController,
+    pagerState: PagerState
 ) {
     val context = LocalContext.current
     val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
@@ -90,7 +95,12 @@ fun LikeScreen(
                 songUiState = songUiState,
                 navController = navController,
                 likeViewModel = likeViewModel,
-                mediaController = mediaController
+                mediaController = mediaController,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(1)
+                    }
+                }
             )
         }
     }

@@ -1,12 +1,17 @@
 package com.example.musicplayer.ui.screens
 
+import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresExtension
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.PagerScope
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -37,22 +43,26 @@ import com.example.musicplayer.ui.components.search.trackUiStateContent
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.rotaryinput.ScalingLazyColumnRotaryScrollAdapter
 import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class)
+@OptIn(ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class,
+    ExperimentalFoundationApi::class
+)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun SearchScreen(
     mediaController: MediaController,
-    navController: NavController
+    navController: NavController,
+    pagerState: PagerState
 ) {
     val context = LocalContext.current
     val trackViewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory)
     val songUiState = trackViewModel.trackUiState
-    val mediaManager = remember { MediaManager(mediaController) }
+    val mediaManager = MediaManager(mediaController)
     val listState = rememberScalingLazyListState()
-    val searchQuery =
-        navController.currentBackStackEntry?.savedStateHandle?.get<String>("search_query")
+    val searchQuery = navController.currentBackStackEntry?.savedStateHandle?.get<String>("search_query")
     val stateHeader = remember { mutableStateOf("Популярные треки") }
     val focusRequester = rememberActiveFocusRequester()
     val coroutineScope = rememberCoroutineScope()
@@ -92,9 +102,14 @@ fun SearchScreen(
             trackUiStateContent(
                 songUiState = songUiState,
                 mediaManager = mediaManager,
-                navController = navController,
                 searchQuery = searchQuery,
-                trackViewModel = trackViewModel
+                trackViewModel = trackViewModel,
+                navController = navController,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(1)
+                    }
+                }
             )
         }
     }

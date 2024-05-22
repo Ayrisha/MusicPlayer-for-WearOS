@@ -3,6 +3,7 @@ package com.example.musicplayer.ui.components
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.animation.core.animate
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FavoriteBorder
@@ -33,7 +34,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@androidx.annotation.OptIn(UnstableApi::class) @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+
+@ExperimentalFoundationApi
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @OptIn(ExperimentalWearFoundationApi::class, ExperimentalWearMaterialApi::class)
 @Composable
 fun SwipeSongCard(
@@ -45,7 +48,8 @@ fun SwipeSongCard(
     title: String,
     artist: String?,
     img: String?,
-    onSwipe: () -> Unit
+    onSwipe: () -> Unit,
+    onClick: () -> Unit
 ){
     val mediaManager = MediaManager(mediaController)
 
@@ -78,13 +82,15 @@ fun SwipeSongCard(
         )
     ){
         SongCard(
+            id = id,
             title = title,
             artist = artist,
             img = img,
             onClick = {
                 mediaManager.setMediaItems(list, index)
-                navController.navigate("play_screen")
-            }
+                onClick()
+            },
+            mediaController = mediaController
         )
     }
 }

@@ -4,9 +4,12 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresExtension
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,13 +38,17 @@ import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.components.SwipeSongCard
 import com.example.musicplayer.ui.viewModel.PlaylistTracksViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
+@ExperimentalFoundationApi
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun PlayListTracksScreen(
     playlistName: String,
     mediaController: MediaController,
-    navController: NavController
+    navController: NavController,
+    pagerState: PagerState
 ) {
     val context = LocalContext.current
     val tracksViewModel: PlaylistTracksViewModel = viewModel(factory = PlaylistTracksViewModel.Factory)
@@ -49,6 +56,8 @@ fun PlayListTracksScreen(
     val listState = rememberScalingLazyListState()
 
     tracksViewModel.getTracks(playlistName)
+
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         positionIndicator = {
@@ -98,6 +107,11 @@ fun PlayListTracksScreen(
                             onSwipe = {
                                 item.id?.let {
                                     tracksViewModel.deleteTrack(playlistName, item.id)}
+                            },
+                            onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(1)
+                                    }
                             }
                         )
                     }

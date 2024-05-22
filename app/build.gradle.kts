@@ -59,6 +59,8 @@ android {
 dependencies {
     implementation ("androidx.wear.compose:compose-navigation:1.2.1")
 
+    implementation ("com.airbnb.android:lottie-compose:6.1.0")
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.percentlayout:percentlayout:1.0.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")

@@ -28,4 +28,42 @@ class MediaManager(private val mediaController: MediaController) {
         }
         mediaController.setMediaItems(mediaItems, index, 0)
     }
+
+    fun addMediaItem(track: Track) {
+        val mediaItem =
+            track.id?.let {
+                MediaItem.Builder()
+                    .setMediaId(it)
+                    .setUri("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/${track.id}.mp3")
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setArtist(track.artist)
+                            .setTitle(track.title)
+                            .build()
+                    )
+                    .build()
+            }
+        if (mediaItem != null) {
+            mediaController.addMediaItem(mediaItem)
+        }
+    }
+
+    fun checkIsPlayingId(id: String): Boolean{
+        if (mediaController.isPlaying){
+            return id == mediaController.currentMediaItem?.mediaId
+        }
+        return false
+    }
+
+    fun checkIsPlaying(): Boolean{
+        return mediaController.isPlaying
+    }
+
+    fun startPlaying(){
+        mediaController.play()
+    }
+
+    fun getMediaController(): MediaController{
+        return mediaController
+    }
 }
