@@ -102,7 +102,6 @@ fun SearchScreen(
             trackUiStateContent(
                 songUiState = songUiState,
                 mediaManager = mediaManager,
-                searchQuery = searchQuery,
                 trackViewModel = trackViewModel,
                 navController = navController,
                 onClick = {

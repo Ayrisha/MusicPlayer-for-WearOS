@@ -4,6 +4,7 @@ package com.example.musicplayer.download
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import androidx.media3.common.MediaItem
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -11,6 +12,7 @@ import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
+import com.example.musicplayer.data.model.Track
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import java.io.File
 import java.util.concurrent.Executor
@@ -20,14 +22,13 @@ import java.util.concurrent.Executors
 class DownloadManagerImpl(
     context: Context
 ) {
-    val downloadManager: DownloadManager
-    val cache: SimpleCache
+    private val downloadManager: DownloadManager
+    private val downloadCache: SimpleCache
+    private val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
 
     init {
         val databaseProvider = StandaloneDatabaseProvider(context)
-        val downloadCache = getSimpleCache(context, databaseProvider)
-        cache = getSimpleCache(context, databaseProvider)
-        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+        downloadCache = getSimpleCache(context, databaseProvider)
 
         val downloadExecutor = Executors.newFixedThreadPool(3)
 
@@ -48,7 +49,7 @@ class DownloadManagerImpl(
         fun getSimpleCache(context: Context, databaseProvider: StandaloneDatabaseProvider): SimpleCache {
             return simpleCache ?: synchronized(this) {
                 simpleCache ?: SimpleCache(
-                    File(context.filesDir, "downloads"),
+                    File(context.cacheDir, "downloads"),
                     NoOpCacheEvictor(),
                     databaseProvider
                 ).also { simpleCache = it }
@@ -56,9 +57,11 @@ class DownloadManagerImpl(
         }
     }
 
-    @OptIn(ExperimentalHorologistApi::class)
-    fun getDownloadedTracks(context: Context): List<DownloadedTrack> {
-        val tracker = DownloadTracker(cache, downloadManager)
-        return tracker.getDownloadedTracks()
+    fun getDownloadedManager(): DownloadManager {
+        return downloadManager
+    }
+
+    fun getDownloadCache(): SimpleCache {
+        return downloadCache
     }
 }

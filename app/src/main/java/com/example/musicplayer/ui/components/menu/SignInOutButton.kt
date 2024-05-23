@@ -24,9 +24,7 @@ fun SignInOutButton(navController: NavController, isUserSignedIn: MutableState<B
         ),
         onClick = {
             if (isUserSignedIn.value) {
-
                 googleSignInHelper.signOut()
-
                 isUserSignedIn.value = false
             } else {
                 navController.navigate("auth")

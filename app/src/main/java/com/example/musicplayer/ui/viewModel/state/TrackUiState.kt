@@ -7,5 +7,6 @@ sealed interface TrackUiState{
     data class Start(val trackPopular: List<Track>) : TrackUiState
     object Empty : TrackUiState
     object Error : TrackUiState
+    object NotRegister : TrackUiState
     object Loading : TrackUiState
 }

@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.media3.session.MediaController
+import androidx.navigation.NavController
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import com.example.musicplayer.media.MediaManager
@@ -34,6 +35,7 @@ fun SongInfoScreen(
     title: String,
     artist: String?,
     img: String?,
+    navController: NavController,
     mediaController: MediaController,
     pagerState: PagerState
 ) {
@@ -74,8 +76,11 @@ fun SongInfoScreen(
                 id = id,
                 title = title,
                 artist = artist,
-                img = img,
+                img = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${img}.png",
                 onClick = { /*TODO*/ },
+                onLongClick = {
+                    navController.navigate("song_info/${title}/${artist}/${img}/${id}")
+                },
                 mediaController = mediaManager.getMediaController()
             )
         }

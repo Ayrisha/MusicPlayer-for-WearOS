@@ -49,6 +49,7 @@ import com.example.musicplayer.media.PlaybackService
 import com.example.musicplayer.ui.screens.AddPlayListScreen
 import com.example.musicplayer.ui.screens.AuthInfo
 import com.example.musicplayer.ui.screens.AuthScreen
+import com.example.musicplayer.ui.screens.ConfirmDownloadScreen
 import com.example.musicplayer.ui.screens.LikeScreen
 import com.example.musicplayer.ui.screens.LoadMusicScreen
 import com.example.musicplayer.ui.screens.MenuScreen
@@ -92,9 +93,8 @@ class MainActivity : ComponentActivity() {
             mediaController = controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
-        setContent {
-            val requiresAuth by application.container.tokenAuthenticator.requiresAuthFlow.collectAsState()
 
+        setContent {
             val pagerState = rememberPagerState(
                 initialPage = 0,
                 initialPageOffsetFraction = 0F,
@@ -121,40 +121,13 @@ class MainActivity : ComponentActivity() {
             val navController = rememberSwipeDismissableNavController()
             val playerNavController = rememberSwipeDismissableNavController()
 
-            LaunchedEffect(requiresAuth) {
-                if (requiresAuth) {
-                    navController.navigate("auth") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                }
-            }
-
             LaunchedEffect(Unit) {
                 val refreshToken = runBlocking { dataStore.refreshToken.firstOrNull() }
 
-                Log.d("MainActivity", "Get refresh token from Datastore: $refreshToken")
-
                 if (refreshToken == null) {
-                    navController.navigate("auth") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
+                    navController.navigate("auth")
                 } else {
-                    val accessToken = runBlocking { dataStore.accessToken.firstOrNull() }
-
-                    Log.d("MainActivity", "Get access token from Datastore: $accessToken")
-
-                    navController.navigate("menu") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
+                    navController.navigate("menu")
                 }
             }
 
@@ -184,7 +157,6 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .pointerInput(Unit) {
                                         detectHorizontalDragGestures { _, dragAmount ->
-
                                             if (dragAmount < 0) {
                                                 coroutineScope.launch {
                                                     pagerState.animateScrollToPage(1)
@@ -261,7 +233,10 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                     composable("load_musics") {
-                                        LoadMusicScreen(context = LocalContext.current)
+                                        LoadMusicScreen(
+                                            mediaController = mediaController,
+                                            context = LocalContext.current,
+                                            pagerState = pagerState)
                                     }
                                     composable(
                                         route = "song_info/{title}/{artist}/{img}/{id}",
@@ -282,6 +257,7 @@ class MainActivity : ComponentActivity() {
                                                 title = title,
                                                 artist = artist,
                                                 img = img,
+                                                navController = navController,
                                                 mediaController = mediaController,
                                                 pagerState = pagerState
                                             )

@@ -1,10 +1,8 @@
 package com.example.musicplayer.ui.viewModel
 
-import android.net.http.HttpException
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresExtension
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,11 +16,12 @@ import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.ui.viewModel.state.TrackUiState
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.io.IOException
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class SearchViewModel (
-    private val musicPlayerRepository: MusicPlayerRepository
+    private val musicPlayerRepository: MusicPlayerRepository,
+    private val application: MusicApplication
 ): ViewModel(){
 
     var trackUiState: TrackUiState by mutableStateOf(TrackUiState.Loading)
@@ -39,7 +38,12 @@ class SearchViewModel (
                     TrackUiState.Start(trackPopular = listPopularTrack)
                 }
             } catch (e: HttpException){
-                TrackUiState.Error
+                if (e.message == "HTTP 401 "){
+                    TrackUiState.NotRegister
+                }
+                else{
+                    TrackUiState.Error
+                }
             } catch (e: IOException){
                 TrackUiState.Error
             }
@@ -59,7 +63,12 @@ class SearchViewModel (
                     TrackUiState.Success(trackSearches = listTrack)
                 }
             } catch (e: HttpException){
-                TrackUiState.Error
+                if (e.message == "HTTP 401 "){
+                    TrackUiState.NotRegister
+                }
+                else{
+                    TrackUiState.Error
+                }
             } catch (e: IOException){
                 TrackUiState.Error
             }
@@ -71,7 +80,7 @@ class SearchViewModel (
             initializer {
                 val application = (this[APPLICATION_KEY] as MusicApplication)
                 val musicRepository = application.container.musicPlayerRepository
-                SearchViewModel(musicPlayerRepository = musicRepository)
+                SearchViewModel(musicPlayerRepository = musicRepository, application = application)
             }
         }
     }

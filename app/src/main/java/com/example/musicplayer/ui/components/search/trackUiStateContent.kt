@@ -8,6 +8,7 @@ import androidx.wear.compose.foundation.lazy.itemsIndexed
 import com.example.musicplayer.media.MediaManager
 import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Loading
+import com.example.musicplayer.ui.components.NotRegister
 import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.viewModel.SearchViewModel
@@ -18,7 +19,6 @@ import com.example.musicplayer.ui.viewModel.state.TrackUiState
 fun ScalingLazyListScope.trackUiStateContent(
     songUiState: TrackUiState,
     mediaManager: MediaManager,
-    searchQuery: String?,
     trackViewModel: SearchViewModel,
     navController: NavController,
     onClick: () -> Unit
@@ -30,7 +30,7 @@ fun ScalingLazyListScope.trackUiStateContent(
                     id = item.id,
                     title = item.title,
                     artist = item.artist,
-                    img = item.imgLink,
+                    img = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${item.imgLink}.png",
                     onClick = {
                         mediaManager.setMediaItems(songUiState.trackPopular, index)
                         onClick()
@@ -48,7 +48,7 @@ fun ScalingLazyListScope.trackUiStateContent(
                     id = item.id,
                     title = item.title,
                     artist = item.artist,
-                    img = item.imgLink,
+                    img = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${item.imgLink}.png",
                     onClick = {
                         mediaManager.setMediaItems(songUiState.trackSearches, index)
                         onClick()
@@ -60,6 +60,14 @@ fun ScalingLazyListScope.trackUiStateContent(
                 )
             }
         }
+
+        is TrackUiState.NotRegister -> item {
+            NotRegister(
+                registerAction = {
+                    navController.navigate("auth")
+                }
+            )
+        }
         is TrackUiState.Empty -> item {
             EmptyBox("По вашему запросу ничего не найдено")
         }
@@ -68,11 +76,7 @@ fun ScalingLazyListScope.trackUiStateContent(
         }
         is TrackUiState.Error -> item {
             Retry {
-                if (searchQuery != null) {
-                    trackViewModel.searchTrack(searchQuery)
-                } else {
                     trackViewModel.popularTrack()
-                }
             }
         }
     }

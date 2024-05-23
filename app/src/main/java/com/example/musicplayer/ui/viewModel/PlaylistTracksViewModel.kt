@@ -1,6 +1,5 @@
 package com.example.musicplayer.ui.viewModel
 
-import android.net.http.HttpException
 import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
@@ -16,7 +15,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.ui.viewModel.state.TrackListState
+import com.example.musicplayer.ui.viewModel.state.TrackUiState
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.io.IOException
 
 class PlaylistTracksViewModel (
@@ -40,7 +41,12 @@ class PlaylistTracksViewModel (
                     TrackListState.Success(tracks = listLikes)
                 }
             } catch (e: HttpException){
-                TrackListState.Error
+                if (e.message == "HTTP 401 "){
+                    TrackListState.NotRegister
+                }
+                else{
+                    TrackListState.Error
+                }
             } catch (e: IOException){
                 TrackListState.Error
             }

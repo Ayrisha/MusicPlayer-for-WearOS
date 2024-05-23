@@ -2,6 +2,7 @@ package com.example.musicplayer.auth
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.wear.activity.ConfirmationActivity
@@ -40,7 +41,10 @@ class GoogleSignInHelper(private val context: Context) {
     fun signOut() {
         val application = context.applicationContext as MusicApplication
 
-        runBlocking { application.container.dataStore.clearTokens() }
+        runBlocking {
+            application.container.dataStore.clearTokens()
+            application.container.authInterceptor.setToken("")
+        }
 
         googleSignInClient.signOut()
     }

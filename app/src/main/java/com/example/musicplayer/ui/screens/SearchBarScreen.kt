@@ -103,6 +103,7 @@ fun SearchBarScreen(
             )
         }
     }
+
     DisposableEffect(Unit) {
         onDispose {
             navController.previousBackStackEntry?.savedStateHandle?.set(

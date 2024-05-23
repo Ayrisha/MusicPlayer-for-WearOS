@@ -1,8 +1,14 @@
 package com.example.musicplayer.media
 
+import android.annotation.SuppressLint
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.session.MediaController
 import com.example.musicplayer.data.model.Track
 
@@ -46,6 +52,11 @@ class MediaManager(private val mediaController: MediaController) {
         if (mediaItem != null) {
             mediaController.addMediaItem(mediaItem)
         }
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    fun addLoadMediaItem(){
+
     }
 
     fun checkIsPlayingId(id: String): Boolean{

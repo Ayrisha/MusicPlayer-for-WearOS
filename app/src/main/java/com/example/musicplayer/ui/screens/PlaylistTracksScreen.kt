@@ -33,11 +33,13 @@ import androidx.wear.compose.material.VignettePosition
 import androidx.wear.compose.material.scrollAway
 import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Loading
+import com.example.musicplayer.ui.components.NotRegister
 import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.components.SwipeSongCard
 import com.example.musicplayer.ui.viewModel.PlaylistTracksViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
+import com.example.musicplayer.ui.viewModel.state.TrackUiState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -79,6 +81,13 @@ fun PlayListTracksScreen(
                     retryAction = {
                         tracksViewModel.getTracks(playlistName)
                     })
+            }
+            is TrackListState.NotRegister -> {
+                NotRegister(
+                    registerAction = {
+                        navController.navigate("auth")
+                    }
+                )
             }
             is TrackListState.Success ->
                 ScalingLazyColumn(

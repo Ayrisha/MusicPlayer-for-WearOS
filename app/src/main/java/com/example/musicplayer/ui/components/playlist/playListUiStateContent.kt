@@ -7,6 +7,7 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyListScope
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Loading
+import com.example.musicplayer.ui.components.NotRegister
 import com.example.musicplayer.ui.components.Retry
 import com.example.musicplayer.ui.viewModel.PlayListViewModel
 import com.example.musicplayer.ui.viewModel.state.PlayListUiState
@@ -39,5 +40,12 @@ fun ScalingLazyListScope.playListUiStateContent(
                     }
                 )
             }
+        is PlayListUiState.NotRegister -> item{
+            NotRegister(
+                registerAction = {
+                    navController.navigate("auth")
+                }
+            )
+        }
     }
 }

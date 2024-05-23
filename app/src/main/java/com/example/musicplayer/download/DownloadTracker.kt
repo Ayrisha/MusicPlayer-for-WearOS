@@ -4,31 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.media3.datasource.cache.Cache
-import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.CacheSpan
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
+import com.example.musicplayer.data.model.Track
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import java.io.File
-
-data class DownloadedTrack(
-    val uri: Uri,
-    val title: String,
-    val artist: String
-)
-
-data class TrackMetadata(
-    val title: String,
-    val artist: String
-)
 
 @SuppressLint("UnsafeOptInUsageError")
 @ExperimentalHorologistApi
 class DownloadTracker(
-    private val cache: Cache,
     private val downloadManager: DownloadManager
 ) {
     init {
@@ -43,14 +28,24 @@ class DownloadTracker(
         ) {
             when (download.state) {
                 Download.STATE_QUEUED -> Log.d("DownloadManagerListener", "Загрузка ожидает")
-                Download.STATE_DOWNLOADING -> Log.d("DownloadManagerListener", "Загрузка в процессе")
-                Download.STATE_STOPPED -> Log.d("DownloadManagerListener", "Загрузка приостановлена")
+                Download.STATE_DOWNLOADING -> Log.d(
+                    "DownloadManagerListener",
+                    "Загрузка в процессе"
+                )
+
+                Download.STATE_STOPPED -> Log.d(
+                    "DownloadManagerListener",
+                    "Загрузка приостановлена"
+                )
+
                 Download.STATE_COMPLETED -> {
                     Log.d("DownloadManagerListener", "Загрузка завершена")
                 }
+
                 Download.STATE_FAILED -> Log.d("DownloadManagerListener", "Загрузка неудачна")
                 Download.STATE_REMOVING -> {
                 }
+
                 Download.STATE_RESTARTING -> {
                 }
             }
@@ -61,61 +56,112 @@ class DownloadTracker(
         }
     }
 
-    fun addDownload(url: String, id: String, context: Context) {
+    fun addDownload(
+        url: String,
+        id: String,
+        title: String,
+        artist: String,
+        imgUrl: String,
+        context: Context
+    ) {
         Log.d("DownloadTracker", "addDownload")
-        val downloadRequest = DownloadRequest.Builder(/* id = */ id, /* uri = */ Uri.parse(url)).build()
-        downloadManager.addDownload(downloadRequest)
+
+        val separator = ":"
+
+        val dataString = "$title$separator$artist"
+
+        val dataBytes = dataString.encodeToByteArray()
+
+        val downloadTrackRequest =
+            DownloadRequest.Builder(/* id = */ id, /* uri = */ Uri.parse(url))
+                .setData(dataBytes)
+                .build()
+
+        val downloadImgRequest =
+            DownloadRequest.Builder(/* id = */ id + "img", /* uri = */ Uri.parse(imgUrl))
+                .setData(dataBytes)
+                .build()
+
+        downloadManager.addDownload(downloadTrackRequest)
+        downloadManager.addDownload(downloadImgRequest)
+
         DownloadService.sendAddDownload(
             context,
             MediaDownloadServiceImpl::class.java,
-            downloadRequest,
+            downloadTrackRequest,
             /* foreground= */ false
         )
     }
 
     fun removeDownload(downloadId: String) {
-        Log.d("DownloadTracker", "removeDownload")
         downloadManager.removeDownload(downloadId)
     }
 
-    fun getDownloadedTracks(): List<DownloadedTrack> {
-        val completedDownloads = mutableListOf<Download>()
+
+    fun getDownloadedTracks(): List<Track> {
         val downloads = downloadManager.downloadIndex.getDownloads(Download.STATE_COMPLETED)
+        val listMedia = mutableListOf<Track>()
+        val imageMap = mutableMapOf<String, String>()
 
         if (downloads.moveToFirst()) {
             do {
                 val download = downloads.download
-                Log.d("DownloadID", download.request.uri.toString())
-                completedDownloads.add(download)
+                val id = download.request.id
+
+                if (download.state == Download.STATE_COMPLETED) {
+                    if (id.endsWith("img")) {
+                        val trackId = id.removeSuffix("img")
+                        imageMap[trackId] = download.request.uri.toString()
+
+                        Log.d("DownloadTracker", "trackId: $trackId")
+                    }
+                }
+            } while (downloads.moveToNext())
+        }
+
+        if (downloads.moveToFirst()) {
+            do {
+                val download = downloads.download
+                val dataString = download.request.data.decodeToString()
+                val id = download.request.id
+
+                if (download.state == Download.STATE_COMPLETED) {
+                    if (!id.endsWith("img")) {
+                        val (title, artist) = dataString.split(":")
+                        val imgLink = imageMap[id] ?: ""
+                        Log.d("DownloadTracker", "uri: $imgLink")
+                        val track = Track(
+                            id = id,
+                            title = title,
+                            artist = artist,
+                            imgLink = imgLink
+                        )
+                        listMedia.add(track)
+                    }
+                }
             } while (downloads.moveToNext())
         }
 
         downloads.close()
 
-        return completedDownloads.mapNotNull { download ->
-            if (download.state == Download.STATE_COMPLETED) {
-                val uri = getUriForCachedDownload(download.request)
-                val metadata = getTrackMetadata(download.request)
-                uri?.let {
-                    DownloadedTrack(uri, metadata.title, metadata.artist)
+        return listMedia
+    }
+
+    fun isSongDownloaded(downloadManager: DownloadManager, songId: String): Boolean {
+        val downloads = downloadManager.downloadIndex.getDownloads(Download.STATE_COMPLETED)
+
+        if (downloads.moveToFirst()) {
+            do {
+                val download = downloads.download
+                val mediaId = download.request.id
+                if (mediaId == songId) {
+                    downloads.close()
+                    return true
                 }
-            } else {
-                null
-            }
+            } while (downloads.moveToNext())
         }
-    }
 
-    private fun getUriForCachedDownload(request: DownloadRequest): Uri? {
-        val cacheKey = request.uri.toString()
-        val cachedSpans: MutableSet<CacheSpan> = cache.getCachedSpans(cacheKey)
-        if (cachedSpans.isEmpty()) return null
-
-        val cacheSpan = cachedSpans.first()
-        val file = cacheSpan.file
-        return Uri.fromFile(file)
-    }
-
-    private fun getTrackMetadata(downloadRequest: DownloadRequest): TrackMetadata {
-        return TrackMetadata("Title", "Artist")
+        downloads.close()
+        return false
     }
 }

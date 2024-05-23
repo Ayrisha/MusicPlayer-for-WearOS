@@ -20,12 +20,9 @@ class TokenAuthenticator(
     private val authenticator: AuthInterceptor,
     private val dataStore: MyDataStore
 ) : Authenticator {
-
-    private val _requiresAuthFlow = MutableStateFlow(false)
-    val requiresAuthFlow: StateFlow<Boolean> = _requiresAuthFlow.asStateFlow()
-
     override fun authenticate(route: Route?, response: Response): Request? {
         if (response.code == 401 || response.code == 403) {
+
             val refreshToken = runBlocking {
                 dataStore.refreshToken.firstOrNull()
             }
@@ -38,7 +35,6 @@ class TokenAuthenticator(
             Log.d("TokenAuthenticator", "Get accessToken before update: $accessToken")
 
             if (refreshToken == null) {
-                _requiresAuthFlow.value = true
                 return null
             }
 

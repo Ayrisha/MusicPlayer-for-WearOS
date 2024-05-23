@@ -6,5 +6,6 @@ sealed interface PlayListUiState{
     data class Success(val plaLists: List<PlayList>) : PlayListUiState
     object Empty : PlayListUiState
     object Error : PlayListUiState
+    object NotRegister : PlayListUiState
     object Loading : PlayListUiState
 }

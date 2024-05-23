@@ -22,7 +22,6 @@ interface AppContainer {
     val musicPlayerRepository: MusicPlayerRepository
     val authInterceptor: AuthInterceptor
     val dataStore: MyDataStore
-    val downloadManager: DownloadManager
     val downloadManagerImpl: DownloadManagerImpl
     val tokenAuthenticator: TokenAuthenticator
 }
@@ -33,8 +32,6 @@ class DefaultAppContainer(context: Context) : AppContainer {
 
     override val authInterceptor = AuthInterceptor()
     override val dataStore = MyDataStore(context)
-    @SuppressLint("UnsafeOptInUsageError")
-    override val downloadManager = DownloadManagerImpl(context).downloadManager
     override val downloadManagerImpl = DownloadManagerImpl(context)
 
     private val logging: HttpLoggingInterceptor = HttpLoggingInterceptor()

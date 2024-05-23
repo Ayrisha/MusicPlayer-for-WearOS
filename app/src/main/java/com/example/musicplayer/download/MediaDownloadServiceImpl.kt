@@ -24,7 +24,7 @@ class MediaDownloadServiceImpl : DownloadService(1) {
 
     @SuppressLint("ServiceCast")
     override fun getDownloadManager(): DownloadManager {
-        return (applicationContext as MusicApplication).container.downloadManager
+        return (applicationContext as MusicApplication).container.downloadManagerImpl.getDownloadedManager()
     }
 
     override fun getScheduler(): Scheduler? {

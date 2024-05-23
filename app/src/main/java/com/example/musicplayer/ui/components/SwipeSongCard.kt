@@ -85,10 +85,13 @@ fun SwipeSongCard(
             id = id,
             title = title,
             artist = artist,
-            img = img,
+            img = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/$img.png",
             onClick = {
                 mediaManager.setMediaItems(list, index)
                 onClick()
+            },
+            onLongClick = {
+                navController.navigate("song_info/${title}/${artist}/${img}/${id}")
             },
             mediaController = mediaController
         )
