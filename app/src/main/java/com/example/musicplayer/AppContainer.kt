@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.media3.exoplayer.offline.DownloadManager
 import com.example.musicplayer.auth.AuthInterceptor
 import com.example.musicplayer.auth.TokenAuthenticator
+import com.example.musicplayer.data.LocalDownloadRepository
 import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.data.NetworkMusicPlayerRepository
 import com.example.musicplayer.data.network.MusicService
@@ -15,11 +16,13 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 
 @SuppressLint("UnsafeOptInUsageError")
 interface AppContainer {
     val musicPlayerRepository: MusicPlayerRepository
+    val localDownloadRepository: LocalDownloadRepository
     val authInterceptor: AuthInterceptor
     val dataStore: MyDataStore
     val downloadManagerImpl: DownloadManagerImpl
@@ -51,6 +54,8 @@ class DefaultAppContainer(context: Context) : AppContainer {
     private val retrofitService: MusicService = retrofit.create(MusicService::class.java)
 
     override val musicPlayerRepository: MusicPlayerRepository = NetworkMusicPlayerRepository(retrofitService)
+
+    override val localDownloadRepository: LocalDownloadRepository = LocalDownloadRepository(downloadManagerImpl)
 
     override val tokenAuthenticator: TokenAuthenticator = TokenAuthenticator(musicPlayerRepository, authInterceptor, dataStore)
 

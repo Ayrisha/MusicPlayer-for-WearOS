@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.wear.compose.material.ListHeader
 import com.example.musicplayer.ui.components.add_playlist.AddTextField
 import com.example.musicplayer.ui.viewModel.PlayListViewModel
 
@@ -41,7 +42,7 @@ fun AddPlayListScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Введите название плейлиста",
+            text = "Название плейлиста",
             textAlign = TextAlign.Center,
             color = Color.White
         )

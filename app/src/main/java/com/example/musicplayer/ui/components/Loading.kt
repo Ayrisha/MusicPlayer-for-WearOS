@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 
 @Composable
 fun Loading(
@@ -29,7 +28,7 @@ fun Loading(
     ) {
         if (isLoading.value) {
             CircularProgressIndicator(
-                modifier = Modifier.width(20.dp),
+                modifier = Modifier.width(20.dp).align(Alignment.Center),
                 color = Color(0xFF1C1B1F),
                 trackColor = Color(0xff304ffe),
             )

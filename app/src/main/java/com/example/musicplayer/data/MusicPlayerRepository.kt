@@ -3,7 +3,6 @@ package com.example.musicplayer.data
 import com.example.musicplayer.data.model.PlayList
 import com.example.musicplayer.data.model.Tokens
 import com.example.musicplayer.data.model.Track
-import com.example.musicplayer.data.network.model.TokensInfo
 
 interface MusicPlayerRepository {
     suspend fun searchTrack(title: String): List<Track>

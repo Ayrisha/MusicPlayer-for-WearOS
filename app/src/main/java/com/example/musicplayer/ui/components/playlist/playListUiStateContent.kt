@@ -9,6 +9,7 @@ import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Loading
 import com.example.musicplayer.ui.components.NotRegister
 import com.example.musicplayer.ui.components.Retry
+import com.example.musicplayer.ui.screens.NavigationDestinations
 import com.example.musicplayer.ui.viewModel.PlayListViewModel
 import com.example.musicplayer.ui.viewModel.state.PlayListUiState
 
@@ -34,16 +35,13 @@ fun ScalingLazyListScope.playListUiStateContent(
                 PlayListChip(
                     text = item.title,
                     navController = navController,
-                    trackId = trackId,
-                    onSwipe = {
-                        playListViewModel.deletePlaylist(item.title)
-                    }
+                    trackId = trackId
                 )
             }
         is PlayListUiState.NotRegister -> item{
             NotRegister(
                 registerAction = {
-                    navController.navigate("auth")
+                    navController.navigate(NavigationDestinations.Auth)
                 }
             )
         }

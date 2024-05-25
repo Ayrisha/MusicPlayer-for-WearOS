@@ -1,11 +1,10 @@
 package com.example.musicplayer.download
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
@@ -22,8 +21,7 @@ class MediaDownloadServiceImpl : DownloadService(1) {
         createNotificationChannel()
     }
 
-    @SuppressLint("ServiceCast")
-    override fun getDownloadManager(): DownloadManager {
+    public override fun getDownloadManager(): DownloadManager {
         return (applicationContext as MusicApplication).container.downloadManagerImpl.getDownloadedManager()
     }
 

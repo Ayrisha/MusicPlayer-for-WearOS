@@ -2,10 +2,12 @@ package com.example.musicplayer.ui.components
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,7 +40,9 @@ import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.airbnb.lottie.compose.LottieAnimation
@@ -47,8 +51,8 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.musicplayer.R
 import com.example.musicplayer.media.MediaManager
+import okhttp3.OkHttpClient
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongCard(
     id: String?,
@@ -56,26 +60,15 @@ fun SongCard(
     artist: String?,
     img: String?,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
     mediaController: MediaController
 ) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("play_waves.json"))
 
     val mediaManager = MediaManager(mediaController)
 
     Chip(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ChipDefaults.Height)
-            .combinedClickable(
-                interactionSource = remember {
-                    MutableInteractionSource()
-                },
-                indication = rememberRipple(bounded = true),
-                onClick = onClick,
-                onLongClick = {
-                    onLongClick()
-                }),
+            .height(ChipDefaults.Height),
         onClick = {
             onClick()
         },
@@ -84,13 +77,56 @@ fun SongCard(
         ),
         border = ChipDefaults.chipBorder()
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SongTitle(title = title, artist = artist, img = img)
+        SongTitle(id = id, title = title, artist = artist, img = img, mediaManager = mediaManager)
+
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SongTitle(
+    id: String?,
+    title: String,
+    artist: String?,
+    img: String?,
+    mediaManager: MediaManager
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("play_waves.json"))
+
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ){
+        Box(
+            modifier = Modifier.size(30.dp),
+            contentAlignment = Alignment.Center
+        ){
+            Log.d("SongTitle", "$img")
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(img)
+                    .memoryCachePolicy(CachePolicy.READ_ONLY)
+                    .diskCachePolicy(CachePolicy.READ_ONLY)
+                    .build(),
+                contentDescription = "Profile picture",
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop,
+                onError = { errorState ->
+                    val throwable = errorState.result.throwable
+                    Log.e("AsyncImage", "Error: $throwable")
+                },
+                fallback = painterResource(R.drawable.baseline_person_24),
+            )
             if (id?.let { mediaManager.checkIsPlayingId(it) } == true) {
+                Box(
+                    modifier =  Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.8f))
+                )
                 LottieAnimation(
                     modifier = Modifier.size(24.dp),
                     composition = composition,
@@ -98,37 +134,6 @@ fun SongCard(
                 )
             }
         }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun SongTitle(
-    title: String,
-    artist: String?,
-    img: String?
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ){
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(img)
-                .crossfade(true)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .build(),
-            contentDescription = "Profile picture",
-            modifier = Modifier
-                .size(30.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop,
-            onError = { errorState ->
-                val throwable = errorState.result.throwable
-                Log.e("AsyncImage", "Error: $throwable")
-            },
-            fallback = painterResource(R.drawable.baseline_person_24),
-        )
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {

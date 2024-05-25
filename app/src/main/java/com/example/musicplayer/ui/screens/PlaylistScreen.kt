@@ -44,11 +44,17 @@ fun PlaylistScreen(
     trackId: String? = null
 ) {
     val context = LocalContext.current
+
     val playListViewModel: PlayListViewModel = viewModel(factory = PlayListViewModel.Factory)
+
     val listState = rememberScalingLazyListState()
+
     val playListUiState = playListViewModel.playListUiState
+
     val coroutineScope = rememberCoroutineScope()
+
     val rotaryScrollAdapter = remember { ScalingLazyColumnRotaryScrollAdapter(listState) }
+
     val focusRequester = rememberActiveFocusRequester()
 
     playListViewModel.getPlaylists()

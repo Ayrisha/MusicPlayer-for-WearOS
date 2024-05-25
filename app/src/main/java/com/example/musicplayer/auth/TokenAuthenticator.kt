@@ -14,6 +14,7 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import java.net.SocketTimeoutException
 
 class TokenAuthenticator(
     private val musicRepository: MusicPlayerRepository,
@@ -22,7 +23,6 @@ class TokenAuthenticator(
 ) : Authenticator {
     override fun authenticate(route: Route?, response: Response): Request? {
         if (response.code == 401 || response.code == 403) {
-
             val refreshToken = runBlocking {
                 dataStore.refreshToken.firstOrNull()
             }
@@ -40,32 +40,39 @@ class TokenAuthenticator(
 
             authenticator.setToken(refreshToken)
 
-            var newToken = ""
+            var newToken: String? = null
 
             runBlocking {
                 try {
-                    val tokens = musicRepository.auth()
-                    Log.d("TokenAuthenticator", "Get refreshToken after update: ${tokens.refreshToken}")
-                    Log.d("TokenAuthenticator", "Get accessToken after update: ${tokens.accessToken}")
+                    val tokens = withContext(Dispatchers.IO) {
+                        musicRepository.auth()
+                    }
+                    Log.d(
+                        "TokenAuthenticator",
+                        "Get refreshToken after update: ${tokens.refreshToken}"
+                    )
+                    Log.d(
+                        "TokenAuthenticator",
+                        "Get accessToken after update: ${tokens.accessToken}"
+                    )
 
                     newToken = tokens.accessToken
-
                     dataStore.updateAccessToken(tokens.accessToken)
-
-                    withContext(Dispatchers.Main) {
-                        authenticator.setToken(tokens.accessToken)
-
-                        response.request.newBuilder()
-                            .header("Authorization", "Bearer ${tokens.accessToken}")
-                            .build()
-                    }
+                    authenticator.setToken(tokens.accessToken)
                 } catch (e: Exception) {
                     Log.e("TokenAuthenticator", "Error refreshing tokens: ${e.message}")
+                    if (e is SocketTimeoutException) {
+                        Log.e("TokenAuthenticator", "Timeout occurred while refreshing tokens")
+                    }
+                    return@runBlocking
                 }
             }
-            return response.request.newBuilder()
-                .header("Authorization", "Bearer $newToken")
-                .build()
+
+            return newToken?.let {
+                response.request.newBuilder()
+                    .header("Authorization", "Bearer $it")
+                    .build()
+            }
         }
         return null
     }

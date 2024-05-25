@@ -47,7 +47,6 @@ import androidx.wear.compose.material.dialog.Alert
 import androidx.wear.compose.material.dialog.Dialog
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
-import com.example.musicplayer.download.DownloadTracker
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.example.musicplayer.ui.viewModel.state.LoadTrackState
@@ -63,35 +62,15 @@ import com.google.android.horologist.media.ui.screens.player.PlayerScreen
 @Composable
 fun PlayScreen(
     navController: NavController,
-    controller: MediaController,
-    playerViewModel: PlayerViewModel,
+    mediaController: MediaController
 ) {
     val context = LocalContext.current
 
     val volumeViewModel = createVolumeViewModel(context)
 
+    val playerViewModel = PlayerViewModel(mediaController, context = context)
+
     val likeState: LikeState by mutableStateOf(playerViewModel.likeState)
-
-    val loadState: LoadTrackState by mutableStateOf(playerViewModel.loadState)
-
-    val downloadManager =
-        (context.applicationContext as MusicApplication).container.downloadManagerImpl.getDownloadedManager()
-
-    val downloadTracker = DownloadTracker(downloadManager)
-
-    val fileSize by playerViewModel.fileSize.observeAsState(0L)
-
-    var showDialog by remember { mutableStateOf(false) }
-
-    fun getAvailableStorageSpaceInMB(): Long {
-        val statFs = StatFs(Environment.getExternalStorageDirectory().absolutePath)
-        val availableBlocks = statFs.availableBlocksLong
-        val blockSize = statFs.blockSizeLong
-        val availableSpaceInBytes = availableBlocks * blockSize
-        return availableSpaceInBytes / (1024 * 1024 * 1024)
-    }
-
-    val availableSize = getAvailableStorageSpaceInMB()
 
     DisposableEffect(Unit) {
         onDispose {
@@ -107,44 +86,14 @@ fun PlayScreen(
         buttons = {
             IconButton(
                 onClick = {
-                    controller.currentMediaItem?.let {
-                        when(loadState){
-                            LoadTrackState.Load -> TODO()
-                            LoadTrackState.Unload -> {
-                                playerViewModel.getFileSizeOfUrl("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/${it.mediaId}.mp3")
-                                showDialog = true
-                            }
-                        }
-                    }
-                }
-            ) {
-                when(loadState){
-                    LoadTrackState.Load -> {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.outline_cloud_off_24),
-                            tint = Color.White,
-                            contentDescription = "удаление"
-                        )
-                    }
-                    LoadTrackState.Unload -> {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.baseline_download_24),
-                            tint = Color.White,
-                            contentDescription = "загрузка"
-                        )
-                    }
-                }
-            }
-            IconButton(
-                onClick = {
-                    controller.currentMediaItem?.let {
+                    mediaController.currentMediaItem?.let {
                         when (likeState) {
                             LikeState.Dislike -> {
-                                playerViewModel.setLike(controller.currentMediaItem?.mediaId.toString())
+                                playerViewModel.setLike(mediaController.currentMediaItem?.mediaId.toString())
                             }
 
                             LikeState.Like -> {
-                                playerViewModel.deleteLike(controller.currentMediaItem?.mediaId.toString())
+                                playerViewModel.deleteLike(mediaController.currentMediaItem?.mediaId.toString())
                             }
                         }
                     }
@@ -168,106 +117,7 @@ fun PlayScreen(
                     }
                 }
             }
-            IconButton(
-                onClick = {
-                    controller.currentMediaItem?.let {
-                        navController.navigate("playlists/${controller.currentMediaItem?.mediaId.toString()}")
-                    }
-                }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_playlist_add_24),
-                    tint = Color.White,
-                    contentDescription = "плейлист"
-                )
-            }
         })
-
-    Dialog(showDialog = showDialog, onDismissRequest = { showDialog = false }) {
-        Alert(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
-            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 52.dp),
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_download_24),
-                    contentDescription = "airplane",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .wrapContentSize(align = Alignment.Center),
-                )
-            },
-            title = {
-                Text(
-                    text = "Скачать песню",
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-            },
-            message = {
-                Text(
-                    text = "Этот трек займет около $fileSize Мб свободного места. Всего свободного места $availableSize Гб. Вы хотите продолжить?",
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-            },
-        ) {
-            item {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Chip(
-                        label = { },
-                        icon = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Clear,
-                                    contentDescription = "No",
-                                    tint = Color.White
-                                )
-                            }
-                        },
-                        contentPadding = ChipDefaults.ContentPadding,
-                        onClick = { showDialog = false },
-                        colors = ChipDefaults.secondaryChipColors(),
-                    )
-
-                    Chip(
-                        label = { },
-                        icon = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = "Yes",
-                                    tint = Color.Black
-                                )
-                            }
-                        },
-                        contentPadding = ChipDefaults.ContentPadding,
-                        onClick = {
-                            controller.currentMediaItem?.let { it1 ->
-                                downloadTracker.addDownload(
-                                    url = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/${controller.currentMediaItem?.mediaId}.mp3",
-                                    id = it1.mediaId,
-                                    title = it1.mediaMetadata.title.toString(),
-                                    artist = it1.mediaMetadata.artist.toString(),
-                                    imgUrl = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${controller.currentMediaItem?.mediaId}.png",
-                                    context = context
-                                )
-                            }
-                        },
-                        colors = ChipDefaults.primaryChipColors(),
-                    )
-                }
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalHorologistApi::class)

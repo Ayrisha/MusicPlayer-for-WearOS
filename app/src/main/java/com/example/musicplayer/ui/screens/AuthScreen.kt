@@ -1,7 +1,5 @@
 package com.example.musicplayer.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +20,6 @@ import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import com.example.musicplayer.ui.components.auth.CardSigIn
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun AuthScreen(
     navController: NavController
@@ -53,7 +50,7 @@ fun AuthScreen(
                     imageVector = Icons.Rounded.AccountCircle,
                     text = "Войти через Google",
                     onClick = {
-                        navController.navigate("AuthInfo")
+                        navController.navigate(Routes.AuthInfo)
                     },
                     backgroundPainter = ColorPainter(Color(48, 79, 254))
                 )
@@ -63,7 +60,7 @@ fun AuthScreen(
                     imageVector = Icons.Rounded.Clear,
                     text = "Продолжить без аккаунта",
                     onClick = {
-                        navController.navigate("menu")
+                        navController.navigate(NavigationDestinations.Menu)
                     },
                     backgroundPainter = ColorPainter(Color(0xFF1C1B1F)),
                     padding = 20.dp

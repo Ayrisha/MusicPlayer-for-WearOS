@@ -10,11 +10,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.session.MediaController
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
-import com.example.musicplayer.download.DownloadTracker
+import com.example.musicplayer.download.DownloadManagerImpl
 import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.example.musicplayer.ui.viewModel.state.LoadTrackState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -47,11 +46,11 @@ class PlayerViewModel(
 
             val appContainer = (context.applicationContext as MusicApplication).container
             musicPlayerRepository = appContainer.musicPlayerRepository
-            val downloadedManager = appContainer.downloadManagerImpl.getDownloadedManager()
+            val downloadManagerImpl = appContainer.downloadManagerImpl
 
             player.currentMediaItem?.mediaId?.let {
                 checkLikeTrack(it)
-                checkLoadTrack(it, downloadedManager)
+                checkLoadTrack(it, downloadManagerImpl)
             }
 
             player.addListener(
@@ -62,7 +61,7 @@ class PlayerViewModel(
                         val newMediaItem = mediaItem?.mediaId
                         newMediaItem?.let {
                             checkLikeTrack(it)
-                            checkLoadTrack(it, downloadedManager)
+                            checkLoadTrack(it, downloadManagerImpl)
                         }
                     }
                 }
@@ -129,10 +128,9 @@ class PlayerViewModel(
         }
     }
 
-    fun checkLoadTrack(idMedia: String, downloadManager: DownloadManager) {
+    fun checkLoadTrack(idMedia: String, downloadManagerImpl: DownloadManagerImpl) {
         viewModelScope.launch {
-            val downloadTracker = DownloadTracker(downloadManager)
-            val result = downloadTracker.isSongDownloaded(downloadManager, idMedia)
+            val result = downloadManagerImpl.isSongDownloaded(idMedia)
             loadState = if (result) {
                 LoadTrackState.Load
             } else {

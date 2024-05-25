@@ -11,6 +11,7 @@ import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Text
 import com.example.musicplayer.auth.GoogleSignInHelper
+import com.example.musicplayer.ui.screens.NavigationDestinations
 import kotlinx.coroutines.launch
 
 @Composable
@@ -27,7 +28,7 @@ fun SignInOutButton(navController: NavController, isUserSignedIn: MutableState<B
                 googleSignInHelper.signOut()
                 isUserSignedIn.value = false
             } else {
-                navController.navigate("auth")
+                navController.navigate(NavigationDestinations.Auth)
             }
         }
     ) {

@@ -9,27 +9,32 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
+import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
+import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.Text
+import com.example.musicplayer.ui.components.search_bar.RecentSearchItem
 import com.example.musicplayer.ui.components.search_bar.SearchBar
 import com.example.musicplayer.ui.viewModel.RecentSearchViewModel
-import com.example.musicplayer.ui.components.search_bar.searchUiStateContent
+import com.example.musicplayer.ui.viewModel.state.RecentSearchState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.rotaryinput.ScalingLazyColumnRotaryScrollAdapter
 import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
@@ -83,33 +88,56 @@ fun SearchBarScreen(
                         recentSearchViewModel.updateSearchTextState(it)
                     },
                     onSearchClicked = {
-                        coroutineScope.launch {
+                        runBlocking {
                             recentSearchViewModel.updateSearchTextState(it)
                             recentSearchViewModel.setSearch(it)
                             navController.previousBackStackEntry?.savedStateHandle?.set(
                                 "search_query",
                                 it
                             )
-                            navController.popBackStack()
                         }
+                        navController.popBackStack()
                     }
                 )
             }
             item { Spacer(Modifier.height(10.dp)) }
-            searchUiStateContent(
-                recentSearchUiState = recentSearchUiState,
-                navController = navController,
-                recentSearchViewModel = recentSearchViewModel
-            )
-        }
-    }
+            when (recentSearchUiState) {
+                is RecentSearchState.Empty -> item {
+                    Text(
+                        text = "Нет последних поисковых запросов",
+                        color = Color.White.copy(alpha = 0.5f),
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            navController.previousBackStackEntry?.savedStateHandle?.set(
-                "search_query",
-                null
-            )
+                is RecentSearchState.Success -> {
+                    item {
+                        ListHeader {
+                            Text(
+                                text = "Последние поиск. запросы",
+                                color = Color.White.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    items(recentSearchUiState.trackSearches) { it ->
+                        RecentSearchItem(
+                            query = it,
+                            onDeleteClicked = {
+                                recentSearchViewModel.removeRecentSearch(it)
+                            },
+                            onItemClicked = {
+                                recentSearchViewModel.updateSearchTextState(it)
+                                navController.previousBackStackEntry?.savedStateHandle?.set(
+                                    "search_query",
+                                    it
+                                )
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 

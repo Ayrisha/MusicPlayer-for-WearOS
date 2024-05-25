@@ -1,5 +1,6 @@
 package com.example.musicplayer.ui.screens
 
+import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -25,22 +26,21 @@ import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
-import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.scrollAway
+import com.example.musicplayer.media.MediaManager
 import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Loading
+import com.example.musicplayer.ui.components.NotRegister
+import com.example.musicplayer.ui.components.like.PlayButtonLike
 import com.example.musicplayer.ui.components.Retry
-import com.example.musicplayer.ui.components.SwipeSongCard
+import com.example.musicplayer.ui.components.SongCard
 import com.example.musicplayer.ui.components.like.LikeHeader
-import com.example.musicplayer.ui.components.like.likeUiStateContent
 import com.example.musicplayer.ui.viewModel.LikeViewModel
 import com.example.musicplayer.ui.viewModel.state.TrackListState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
@@ -56,14 +56,21 @@ import kotlinx.coroutines.launch
 fun LikeScreen(
     mediaController: MediaController,
     navController: NavController,
-    pagerState: PagerState
+    pagerState: PagerState,
+    mediaManager: MediaManager
 ) {
     val context = LocalContext.current
+
     val likeViewModel: LikeViewModel = viewModel(factory = LikeViewModel.Factory)
+
     val songUiState = likeViewModel.likeUiState
+
     val listState = rememberScalingLazyListState()
+
     val coroutineScope = rememberCoroutineScope()
+
     val rotaryScrollAdapter = ScalingLazyColumnRotaryScrollAdapter(listState)
+
     val focusRequester = rememberActiveFocusRequester()
 
     likeViewModel.getTracksLike()
@@ -90,18 +97,49 @@ fun LikeScreen(
             state = listState,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            item { PlayButtonLike(navController, songUiState, mediaManager, pagerState) }
             item { LikeHeader() }
-            likeUiStateContent(
-                songUiState = songUiState,
-                navController = navController,
-                likeViewModel = likeViewModel,
-                mediaController = mediaController,
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(1)
+
+            when (songUiState) {
+                is TrackListState.Success -> {
+                    itemsIndexed(songUiState.tracks) { index, item ->
+                        SongCard(
+                            id = item.id,
+                            title = item.title,
+                            artist = item.artist,
+                            img = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${item.imgLink}.png",
+                            onClick = {
+                                val image = Uri.encode("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${item.imgLink}.png")
+                                navController.navigate(Routes.SongInfoScreen + "/${item.title}/${item.artist}/${item.id}/${image}")
+                            },
+                            mediaController = mediaManager.getMediaController()
+                        )
                     }
                 }
-            )
+
+                is TrackListState.NotRegister -> item{
+                    NotRegister(
+                        registerAction = {
+                            navController.navigate(NavigationDestinations.Auth)
+                        }
+                    )
+                }
+
+                is TrackListState.Empty -> item {
+                    EmptyBox("Нет избранных")
+                }
+
+                is TrackListState.Loading -> item {
+                    Loading()
+                }
+
+                is TrackListState.Error -> item {
+                    Retry(
+                        retryAction = {
+                            likeViewModel.getTracksLike()
+                        })
+                }
+            }
         }
     }
 

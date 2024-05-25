@@ -50,10 +50,10 @@ fun MenuScreen(navController: NavController) {
 
     val menuItems = remember {
         listOf(
-            "Поиск" to "song_search",
-            "Плейлисты" to "playlists",
-            "Избранное" to "like_music",
-            "Скачанное" to "load_musics"
+            "Поиск" to Routes.SearchScreen,
+            "Плейлисты" to Routes.PlaylistScreen,
+            "Избранное" to Routes.LikeScreen,
+            "Скачанное" to Routes.LoadMusicScreen
         )
     }
 

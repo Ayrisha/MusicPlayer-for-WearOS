@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.musicplayer.ui.screens.Routes
 
 @Composable
 fun AddTextField(
@@ -42,7 +43,7 @@ fun AddTextField(
         keyboardActions = KeyboardActions(
             onDone = {
                 onSearchClicked(text)
-                navController.popBackStack("playlists", false)
+                navController.popBackStack(Routes.PlaylistScreen, false)
             }
         ),
         textStyle = TextStyle.Default.copy(fontSize = 10.sp),

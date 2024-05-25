@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
+import com.example.musicplayer.ui.screens.Routes
 
 @Composable
 fun AddPlaylistButton(
@@ -21,7 +22,7 @@ fun AddPlaylistButton(
         modifier = Modifier
             .size(ButtonDefaults.SmallButtonSize),
         onClick = {
-            navController.navigate("addplaylist")
+            navController.navigate(Routes.AddPlayListScreen)
         },
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(48, 79, 254)

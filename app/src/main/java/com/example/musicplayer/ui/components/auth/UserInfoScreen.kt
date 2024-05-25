@@ -28,6 +28,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
+import com.example.musicplayer.ui.screens.NavigationDestinations
 import kotlinx.coroutines.launch
 
 @Composable
@@ -66,8 +67,8 @@ fun UserInfoScreen(
 
                 application.container.authInterceptor.setToken(tokens.accessToken)
 
-                navController.navigate("menu") {
-                    popUpTo("auth") {
+                navController.navigate(NavigationDestinations.Menu) {
+                    popUpTo(NavigationDestinations.Auth) {
                         inclusive = true
                     }
                 }

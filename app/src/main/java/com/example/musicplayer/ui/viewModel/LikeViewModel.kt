@@ -12,10 +12,13 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
+import com.example.musicplayer.ui.viewModel.state.LikeState
 import com.example.musicplayer.ui.viewModel.state.TrackListState
 import com.example.musicplayer.ui.viewModel.state.TrackUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -23,6 +26,8 @@ class LikeViewModel (
     private val musicPlayerRepository: MusicPlayerRepository
 ): ViewModel(){
     var likeUiState: TrackListState by mutableStateOf(TrackListState.Loading)
+
+    var likeState: LikeState by mutableStateOf(LikeState.Dislike)
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getTracksLike(){
@@ -46,6 +51,42 @@ class LikeViewModel (
                 }
             } catch (e: IOException){
                 TrackListState.Error
+            }
+        }
+    }
+
+    private suspend fun checkLikeResponse(idMedia: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                musicPlayerRepository.checkTrackLike(idMedia)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+
+    fun setLike(idMedia: String){
+        viewModelScope.launch {
+            musicPlayerRepository.setTrackLike(idMedia)
+            checkLikeTrack(idMedia)
+        }
+    }
+
+    fun deleteLike(idMedia: String){
+        viewModelScope.launch {
+            musicPlayerRepository.deleteTrackLike(idMedia)
+            checkLikeTrack(idMedia)
+        }
+    }
+
+    fun checkLikeTrack(idMedia: String) {
+        viewModelScope.launch {
+            val result = checkLikeResponse(idMedia)
+            likeState = if (result) {
+                LikeState.Like
+            } else {
+                LikeState.Dislike
             }
         }
     }
