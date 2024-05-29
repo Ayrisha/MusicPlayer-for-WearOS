@@ -34,10 +34,11 @@ class MediaDownloadServiceImpl : DownloadService(1) {
         notMetRequirements: Int
     ): Notification {
         return NotificationCompat.Builder(this, "download_channel")
-            .setContentTitle("Downloading Music")
-            .setContentText("Downloading in progress")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentTitle("Скачивание трека")
+            .setContentText("Загрузка в процессе...")
+            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .extend( NotificationCompat.WearableExtender())
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
     }
 
@@ -45,7 +46,7 @@ class MediaDownloadServiceImpl : DownloadService(1) {
         val channel = NotificationChannel(
             "download_channel",
             "Download Notifications",
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         channel.description = "Notifications for download progress"
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

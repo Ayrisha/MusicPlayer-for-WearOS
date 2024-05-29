@@ -1,13 +1,18 @@
 package com.example.musicplayer.data
 
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.offline.Download
 import com.example.musicplayer.data.model.PlayList
 import com.example.musicplayer.data.model.Tokens
 import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.data.network.MusicService
 import com.example.musicplayer.data.network.model.TokensInfo
+import com.example.musicplayer.download.DownloadManagerImpl
 
 class NetworkMusicPlayerRepository(
-    private var musicService: MusicService
+    private var musicService: MusicService,
+    private val downloadManagerImpl: DownloadManagerImpl,
 ): MusicPlayerRepository{
     override suspend fun searchTrack(
         title: String
@@ -96,6 +101,53 @@ class NetworkMusicPlayerRepository(
 
     override suspend fun auth(): Tokens = musicService.auth().let {
         Tokens(it.accessToken, it.refreshToken)
+    }
+
+    @OptIn(UnstableApi::class) override suspend fun getDownloadedTracks(): List<Track> {
+        val downloadManager = downloadManagerImpl.getDownloadedManager()
+        val downloads = downloadManager.downloadIndex.getDownloads(Download.STATE_COMPLETED)
+        val listMedia = mutableListOf<Track>()
+        val imageMap = mutableMapOf<String, String>()
+
+        if (downloads.moveToFirst()) {
+            do {
+                val download = downloads.download
+                val id = download.request.id
+
+                if (download.state == Download.STATE_COMPLETED) {
+                    if (id.endsWith("img")) {
+                        val trackId = id.removeSuffix("img")
+                        imageMap[trackId] = download.request.uri.toString()
+                    }
+                }
+            } while (downloads.moveToNext())
+        }
+
+        if (downloads.moveToFirst()) {
+            do {
+                val download = downloads.download
+                val dataString = download.request.data.decodeToString()
+                val id = download.request.id
+
+                if (download.state == Download.STATE_COMPLETED) {
+                    if (!id.endsWith("img")) {
+                        val (title, artist) = dataString.split(":")
+                        val imgLink = imageMap[id] ?: ""
+                        val track = Track(
+                            id = id,
+                            title = title,
+                            artist = artist,
+                            imgLink = imgLink
+                        )
+                        listMedia.add(track)
+                    }
+                }
+            } while (downloads.moveToNext())
+        }
+
+        downloads.close()
+
+        return listMedia
     }
 
     fun updateRetrofitService(newService: MusicService) {

@@ -21,7 +21,6 @@ import java.io.IOException
 
 class SearchViewModel (
     private val musicPlayerRepository: MusicPlayerRepository,
-    private val application: MusicApplication
 ): ViewModel(){
 
     var trackUiState: TrackUiState by mutableStateOf(TrackUiState.Loading)
@@ -80,7 +79,7 @@ class SearchViewModel (
             initializer {
                 val application = (this[APPLICATION_KEY] as MusicApplication)
                 val musicRepository = application.container.musicPlayerRepository
-                SearchViewModel(musicPlayerRepository = musicRepository, application = application)
+                SearchViewModel(musicPlayerRepository = musicRepository)
             }
         }
     }

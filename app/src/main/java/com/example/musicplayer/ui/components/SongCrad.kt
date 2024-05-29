@@ -51,6 +51,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.musicplayer.R
 import com.example.musicplayer.media.MediaManager
+import com.example.musicplayer.ui.theme.MusicPlayerTheme
 import okhttp3.OkHttpClient
 
 @Composable
@@ -102,7 +103,6 @@ fun SongTitle(
             modifier = Modifier.size(30.dp),
             contentAlignment = Alignment.Center
         ){
-            Log.d("SongTitle", "$img")
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(img)
@@ -118,11 +118,11 @@ fun SongTitle(
                     val throwable = errorState.result.throwable
                     Log.e("AsyncImage", "Error: $throwable")
                 },
-                fallback = painterResource(R.drawable.baseline_person_24),
+                error = painterResource(R.drawable.baseline_audiotrack_24),
             )
             if (id?.let { mediaManager.checkIsPlayingId(it) } == true) {
                 Box(
-                    modifier =  Modifier
+                    modifier = Modifier
                         .size(30.dp)
                         .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.8f))

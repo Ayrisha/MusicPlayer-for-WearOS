@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,11 +27,13 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
+import androidx.wear.protolayout.ModifiersBuilders.Background
 import com.example.musicplayer.R
 
 
 @Composable
 fun MenuItem(
+    background: Painter,
     contents: String,
     navController: NavController,
     screen: String
@@ -43,7 +46,7 @@ fun MenuItem(
             navController.navigate(screen)
         },
         colors = ChipDefaults.imageBackgroundChipColors(
-            backgroundImagePainter = painterResource(id = R.drawable.search),
+            backgroundImagePainter = background,
             backgroundImageScrimBrush = Brush.horizontalGradient(
                 colors = listOf(
                     Color(0xFF1C1B1F),

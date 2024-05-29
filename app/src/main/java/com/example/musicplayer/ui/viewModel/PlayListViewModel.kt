@@ -35,6 +35,15 @@ class PlayListViewModel(
         _getTextState.value = newValue
     }
 
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun setPlaylists(title: String){
+        viewModelScope.launch {
+            musicPlayerRepository.setPlayList(title)
+            getPlaylists()
+        }
+    }
+
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getPlaylists(){
         viewModelScope.launch {
@@ -57,14 +66,6 @@ class PlayListViewModel(
             } catch (e: IOException){
                 PlayListUiState.Error
             }
-        }
-    }
-
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun setPlaylists(title: String){
-        viewModelScope.launch {
-            musicPlayerRepository.setPlayList(title)
-            getPlaylists()
         }
     }
 

@@ -26,7 +26,7 @@ class GoogleSignInHelper(private val context: Context) {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(CLIENT_ID)
             .requestServerAuthCode(CLIENT_ID)
-            .requestScopes(Scope("openid"), Scope("email"), Scope("profile"))
+            .requestScopes(Scope("openid"))
             .requestEmail()
             .build()
 

@@ -4,25 +4,20 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.data.MusicPlayerRepository
-import com.example.musicplayer.download.DownloadManagerImpl
 import com.example.musicplayer.ui.viewModel.state.LikeState
-import com.example.musicplayer.ui.viewModel.state.LoadTrackState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.media.data.repository.PlayerRepositoryImpl
 import com.google.android.horologist.media.ui.state.PlayerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URL
 
 @UnstableApi
 @OptIn(ExperimentalHorologistApi::class)
@@ -34,10 +29,6 @@ class PlayerViewModel(
 
     var likeState: LikeState by mutableStateOf(LikeState.Dislike)
 
-    var loadState: LoadTrackState by mutableStateOf(LoadTrackState.Unload)
-
-    val fileSize = MutableLiveData<Long>()
-
     private lateinit var musicPlayerRepository: MusicPlayerRepository
 
     init {
@@ -46,11 +37,9 @@ class PlayerViewModel(
 
             val appContainer = (context.applicationContext as MusicApplication).container
             musicPlayerRepository = appContainer.musicPlayerRepository
-            val downloadManagerImpl = appContainer.downloadManagerImpl
 
             player.currentMediaItem?.mediaId?.let {
                 checkLikeTrack(it)
-                checkLoadTrack(it, downloadManagerImpl)
             }
 
             player.addListener(
@@ -61,7 +50,6 @@ class PlayerViewModel(
                         val newMediaItem = mediaItem?.mediaId
                         newMediaItem?.let {
                             checkLikeTrack(it)
-                            checkLoadTrack(it, downloadManagerImpl)
                         }
                     }
                 }
@@ -83,29 +71,6 @@ class PlayerViewModel(
         }
     }
 
-    fun getFileSizeOfUrl(url: String) {
-        viewModelScope.launch {
-            val sizeInBytes = withContext(Dispatchers.IO) {
-                try {
-                    val uri = URL(url)
-                    val urlConnection = uri.openConnection()
-                    urlConnection.connect()
-                    val contentLengthStr = urlConnection.getHeaderField("content-length")
-                    if (contentLengthStr.isNullOrEmpty()) {
-                        -1L
-                    } else {
-                        contentLengthStr.toLong()
-                    }
-                } catch (e: Exception) {
-                    Log.d("GetFileSizeOfUrl", "Error: ${e.message}")
-                    -1L
-                }
-            }
-            val sizeInMB = if (sizeInBytes >= 0) sizeInBytes / (1024 * 1024) else sizeInBytes
-            fileSize.value = sizeInMB
-        }
-    }
-
     private suspend fun checkLikeResponse(idMedia: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
@@ -124,17 +89,6 @@ class PlayerViewModel(
                 LikeState.Like
             } else {
                 LikeState.Dislike
-            }
-        }
-    }
-
-    fun checkLoadTrack(idMedia: String, downloadManagerImpl: DownloadManagerImpl) {
-        viewModelScope.launch {
-            val result = downloadManagerImpl.isSongDownloaded(idMedia)
-            loadState = if (result) {
-                LoadTrackState.Load
-            } else {
-                LoadTrackState.Unload
             }
         }
     }

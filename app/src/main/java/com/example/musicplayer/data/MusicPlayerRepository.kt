@@ -19,5 +19,6 @@ interface MusicPlayerRepository {
     suspend fun setPlayListTrack(title: String, trackId: String)
     suspend fun deletePlayList(title: String)
     suspend fun deletePlayListTrack(title: String, trackId: String)
+    suspend fun getDownloadedTracks(): List<Track>
     suspend fun auth(): Tokens
 }

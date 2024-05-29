@@ -3,12 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.musicplayer">
 
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="com.google.android.wearable.permission.URI_REDIRECT_TO_REMOTE"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -33,7 +35,6 @@
         <service
             android:name=".download.MediaDownloadServiceImpl"
             android:exported="false"
-            android:permission="android.permission.FOREGROUND_SERVICE"
             android:foregroundServiceType="dataSync">
         </service>
 

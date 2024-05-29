@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -24,6 +25,7 @@ import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.scrollAway
+import com.example.musicplayer.R
 import com.example.musicplayer.auth.GoogleSignInHelper
 import com.example.musicplayer.ui.components.menu.MenuHeader
 import com.example.musicplayer.ui.components.menu.MenuItem
@@ -50,10 +52,10 @@ fun MenuScreen(navController: NavController) {
 
     val menuItems = remember {
         listOf(
-            "Поиск" to Routes.SearchScreen,
-            "Плейлисты" to Routes.PlaylistScreen,
-            "Избранное" to Routes.LikeScreen,
-            "Скачанное" to Routes.LoadMusicScreen
+            Pair("Поиск", R.drawable.search) to Routes.SearchScreen,
+            Pair("Плейлисты", R.drawable.playlist) to Routes.PlaylistScreen,
+            Pair("Избранное", R.drawable.menu) to Routes.LikeScreen,
+            Pair("Скачанное", R.drawable.menu) to Routes.LoadMusicScreen
         )
     }
 
@@ -78,8 +80,13 @@ fun MenuScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item { MenuHeader() }
-            items(menuItems) { (title, route) ->
-                MenuItem(title, navController, route)
+            items(menuItems) { (menuItem, route) ->
+                MenuItem(
+                    painterResource(id = menuItem.second),
+                    menuItem.first,
+                    navController,
+                    route
+                )
             }
             item { SignInOutButton(navController, isUserSignedIn, googleSignInHelper) }
             item { UserEmail(email, isUserSignedIn) }

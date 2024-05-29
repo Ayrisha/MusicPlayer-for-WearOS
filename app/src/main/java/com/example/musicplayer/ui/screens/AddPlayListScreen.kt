@@ -13,10 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.ListHeader
 import com.example.musicplayer.ui.components.add_playlist.AddTextField
 import com.example.musicplayer.ui.viewModel.PlayListViewModel
@@ -27,6 +34,7 @@ fun AddPlayListScreen(
     navController: NavController
 ) {
     val playListViewModel: PlayListViewModel = viewModel(factory = PlayListViewModel.Factory)
+
     val searchTextState = playListViewModel.getTextState
 
     Column(

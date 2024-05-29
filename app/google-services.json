@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992520983052",
+    "project_id": "musicplayerwearos",
+    "storage_bucket": "musicplayerwearos.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992520983052:android:1a79186c4aad472235d429",
+        "android_client_info": {
+          "package_name": "com.example.musicplayer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPs7HyhFdCfpfab6GjmLAYk_Tl-cGSLH0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

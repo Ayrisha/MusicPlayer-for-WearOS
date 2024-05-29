@@ -3,22 +3,17 @@ package com.example.musicplayer.ui.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.media3.common.util.Log
 import com.example.musicplayer.MusicApplication
-import com.example.musicplayer.data.LocalDownloadRepository
-import com.example.musicplayer.data.model.Track
+import com.example.musicplayer.data.MusicPlayerRepository
 import com.example.musicplayer.download.DownloadManagerImpl
 import com.example.musicplayer.ui.viewModel.state.DownloadTrackState
 import com.example.musicplayer.ui.viewModel.state.LoadTrackState
-import com.example.musicplayer.ui.viewModel.state.TrackListState
-import com.example.musicplayer.ui.viewModel.state.TrackUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,7 +21,7 @@ import java.io.IOException
 import java.net.URL
 
 class DownloadViewModel(
-    private val localDownloadRepository: LocalDownloadRepository
+    private val musicPlayerRepository: MusicPlayerRepository
 ) : ViewModel() {
 
     var downloadTrackState: DownloadTrackState by mutableStateOf(DownloadTrackState.Empty)
@@ -38,7 +33,7 @@ class DownloadViewModel(
     fun getDownloadedTracks() {
         viewModelScope.launch {
             downloadTrackState = try {
-                val tracks = localDownloadRepository.getDownloadedTracks()
+                val tracks = musicPlayerRepository.getDownloadedTracks()
                 if (tracks.isEmpty()) {
                     DownloadTrackState.Empty
                 } else {
@@ -88,8 +83,8 @@ class DownloadViewModel(
             initializer {
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MusicApplication)
-                val localDownloadRepository = application.container.localDownloadRepository
-                DownloadViewModel(localDownloadRepository = localDownloadRepository)
+                val musicPlayerRepository = application.container.musicPlayerRepository
+                DownloadViewModel(musicPlayerRepository = musicPlayerRepository)
             }
         }
     }

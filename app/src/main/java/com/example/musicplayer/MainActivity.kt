@@ -55,6 +55,7 @@ import com.example.musicplayer.ui.screens.Routes
 import com.example.musicplayer.ui.screens.SearchBarScreen
 import com.example.musicplayer.ui.screens.SearchScreen
 import com.example.musicplayer.ui.screens.SongInfoScreen
+import com.example.musicplayer.ui.viewModel.PlayerViewModel
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.flow.firstOrNull
@@ -281,7 +282,8 @@ class MainActivity : ComponentActivity() {
                         }
 
                         Page.Player -> {
-                            PlayScreen(playerNavController, mediaController)
+                            val playerViewModel = PlayerViewModel(mediaController, context = context)
+                            PlayScreen(playerViewModel, playerNavController, mediaController)
                         }
                     }
                 }

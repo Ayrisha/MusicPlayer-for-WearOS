@@ -28,7 +28,6 @@ fun Loading(
     ) {
         if (isLoading.value) {
             CircularProgressIndicator(
-                modifier = Modifier.width(20.dp).align(Alignment.Center),
                 color = Color(0xFF1C1B1F),
                 trackColor = Color(0xff304ffe),
             )

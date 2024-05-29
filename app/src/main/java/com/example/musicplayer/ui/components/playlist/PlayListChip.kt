@@ -98,7 +98,7 @@ fun PlayListChip(
                                 )
                                 putExtra(
                                     ConfirmationActivity.EXTRA_MESSAGE,
-                                    "Песня уже есть в \"$text\""
+                                    "Песня уже есть в $text"
                                 )
                                 putExtra(
                                     ConfirmationActivity.EXTRA_ANIMATION_DURATION_MILLIS,

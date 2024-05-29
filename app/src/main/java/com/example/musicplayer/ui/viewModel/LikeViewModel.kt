@@ -68,15 +68,23 @@ class LikeViewModel (
 
     fun setLike(idMedia: String){
         viewModelScope.launch {
+            try {
             musicPlayerRepository.setTrackLike(idMedia)
             checkLikeTrack(idMedia)
+            } catch (_: HttpException){
+            } catch (_: IOException){
+            }
         }
     }
 
     fun deleteLike(idMedia: String){
         viewModelScope.launch {
+            try {
             musicPlayerRepository.deleteTrackLike(idMedia)
             checkLikeTrack(idMedia)
+            } catch (_: HttpException){
+            } catch (_: IOException){
+            }
         }
     }
 
@@ -88,14 +96,6 @@ class LikeViewModel (
             } else {
                 LikeState.Dislike
             }
-        }
-    }
-
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun deleteTrackLike(trackId: String){
-        viewModelScope.launch {
-            musicPlayerRepository.deleteTrackLike(trackId)
-            getTracksLike()
         }
     }
 

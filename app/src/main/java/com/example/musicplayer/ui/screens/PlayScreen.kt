@@ -61,14 +61,13 @@ import com.google.android.horologist.media.ui.screens.player.PlayerScreen
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun PlayScreen(
+    playerViewModel: PlayerViewModel,
     navController: NavController,
     mediaController: MediaController
 ) {
     val context = LocalContext.current
 
     val volumeViewModel = createVolumeViewModel(context)
-
-    val playerViewModel = PlayerViewModel(mediaController, context = context)
 
     val likeState: LikeState by mutableStateOf(playerViewModel.likeState)
 

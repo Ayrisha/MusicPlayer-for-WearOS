@@ -125,9 +125,9 @@ fun LoadMusicScreen(
                         id = item.id,
                         title = item.title,
                         artist = item.artist,
-                        img = item.imgLink,
+                        img = "",
                         onClick = {
-                            navController.navigate(Routes.SongInfoScreen + "/${item.title}/${item.artist}/${item.id}/${image}")
+                            navController.navigate(Routes.SongInfoScreen + "/${item.title}/${item.artist}/${item.id}/${" "}")
                         },
                         mediaController = mediaManager.getMediaController()
                     )
