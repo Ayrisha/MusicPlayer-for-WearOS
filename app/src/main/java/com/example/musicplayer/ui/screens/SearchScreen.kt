@@ -13,11 +13,9 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
@@ -35,9 +33,7 @@ import androidx.wear.compose.foundation.rememberActiveFocusRequester
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.TimeText
-import androidx.wear.compose.material.dialog.Dialog
 import androidx.wear.compose.material.scrollAway
-import com.example.musicplayer.data.model.Track
 import com.example.musicplayer.media.MediaManager
 import com.example.musicplayer.ui.components.EmptyBox
 import com.example.musicplayer.ui.components.Loading
@@ -52,8 +48,6 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.rotaryinput.ScalingLazyColumnRotaryScrollAdapter
 import com.google.android.horologist.compose.rotaryinput.rotaryWithSnap
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @UnstableApi @OptIn(
     ExperimentalHorologistApi::class, ExperimentalWearFoundationApi::class,

@@ -143,7 +143,6 @@ fun SongInfoScreen(
 
     val availableSize = getAvailableStorageSpaceInMB()
 
-
     if (id != null) {
         likeViewModel.checkLikeTrack(id)
         downloadViewModel.checkLoadTrack(id, downloadManagerImpl)
@@ -221,10 +220,12 @@ fun SongInfoScreen(
                             imageVector = when (likeState) {
                                 LikeState.Like -> Icons.Filled.Favorite
                                 LikeState.Dislike -> Icons.Filled.FavoriteBorder
+                                LikeState.NotConnection -> ImageVector.vectorResource(R.drawable.outline_cloud_off_24)
                             },
                             text = when (likeState) {
                                 LikeState.Like -> "Не нравится"
                                 LikeState.Dislike -> "Нравится"
+                                LikeState.NotConnection -> "Нет подключения"
                             },
                             onClick = {
                                 when (likeState) {
@@ -241,6 +242,8 @@ fun SongInfoScreen(
                                             navController.popBackStack()
                                         }
                                     }
+
+                                    LikeState.NotConnection -> TODO()
                                 }
                             })
 
@@ -254,10 +257,12 @@ fun SongInfoScreen(
                             imageVector = when (downloadTrackState) {
                                 LoadTrackState.Load -> ImageVector.vectorResource(id = R.drawable.outline_delete_24)
                                 LoadTrackState.Unload -> ImageVector.vectorResource(id = R.drawable.baseline_download_24)
+                                is LoadTrackState.Progress -> ImageVector.vectorResource(id = R.drawable.tray_arrow_down)
                             },
                             text = when (downloadTrackState) {
                                 LoadTrackState.Load -> "Удалить c устройства"
                                 LoadTrackState.Unload -> "Скачать"
+                                is LoadTrackState.Progress -> "Загрузка..."
                             },
                             onClick = {
                                 when (downloadTrackState) {
@@ -274,6 +279,8 @@ fun SongInfoScreen(
                                         downloadViewModel.getFileSizeOfUrl("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/music/${id}.mp3")
                                         showDialog = true
                                     }
+
+                                    is LoadTrackState.Progress -> TODO()
                                 }
                             })
 

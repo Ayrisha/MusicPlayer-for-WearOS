@@ -1,6 +1,7 @@
 package com.example.musicplayer.ui.viewModel
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +22,7 @@ import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
+import java.net.ConnectException
 
 class LikeViewModel (
     private val musicPlayerRepository: MusicPlayerRepository
@@ -55,13 +57,16 @@ class LikeViewModel (
         }
     }
 
-    private suspend fun checkLikeResponse(idMedia: String): Boolean {
+    private suspend fun checkLikeResponse(idMedia: String): Int {
         return withContext(Dispatchers.IO) {
             try {
                 musicPlayerRepository.checkTrackLike(idMedia)
-                true
+                1
+            } catch (e: ConnectException) {
+                LikeState.NotConnection
+                2
             } catch (e: Exception) {
-                false
+                0
             }
         }
     }
@@ -71,9 +76,9 @@ class LikeViewModel (
             try {
             musicPlayerRepository.setTrackLike(idMedia)
             checkLikeTrack(idMedia)
-            } catch (_: HttpException){
-            } catch (_: IOException){
+            } catch (_: Exception){
             }
+
         }
     }
 
@@ -82,19 +87,19 @@ class LikeViewModel (
             try {
             musicPlayerRepository.deleteTrackLike(idMedia)
             checkLikeTrack(idMedia)
-            } catch (_: HttpException){
-            } catch (_: IOException){
-            }
+            } catch (_: Exception){}
         }
     }
 
     fun checkLikeTrack(idMedia: String) {
         viewModelScope.launch {
             val result = checkLikeResponse(idMedia)
-            likeState = if (result) {
+            likeState = if (result == 1) {
                 LikeState.Like
-            } else {
+            } else if (result == 0){
                 LikeState.Dislike
+            } else{
+                LikeState.NotConnection
             }
         }
     }

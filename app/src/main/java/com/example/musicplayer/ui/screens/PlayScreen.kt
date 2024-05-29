@@ -45,6 +45,7 @@ import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.dialog.Alert
 import androidx.wear.compose.material.dialog.Dialog
+import coil.decode.ImageSource
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
 import com.example.musicplayer.ui.viewModel.PlayerViewModel
@@ -94,6 +95,8 @@ fun PlayScreen(
                             LikeState.Like -> {
                                 playerViewModel.deleteLike(mediaController.currentMediaItem?.mediaId.toString())
                             }
+
+                            LikeState.NotConnection -> TODO()
                         }
                     }
                 }
@@ -110,6 +113,14 @@ fun PlayScreen(
                     LikeState.Dislike -> {
                         Icon(
                             imageVector = Icons.Filled.FavoriteBorder,
+                            tint = Color.White,
+                            contentDescription = "лайк"
+                        )
+                    }
+
+                    LikeState.NotConnection -> {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.outline_cloud_off_24),
                             tint = Color.White,
                             contentDescription = "лайк"
                         )

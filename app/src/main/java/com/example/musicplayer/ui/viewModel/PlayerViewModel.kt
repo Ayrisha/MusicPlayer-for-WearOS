@@ -18,6 +18,9 @@ import com.google.android.horologist.media.ui.state.PlayerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
+import java.io.IOException
+import java.net.ConnectException
 
 @UnstableApi
 @OptIn(ExperimentalHorologistApi::class)
@@ -43,7 +46,7 @@ class PlayerViewModel(
             }
 
             player.addListener(
-                object: Player.Listener {
+                object : Player.Listener {
                     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                         super.onMediaItemTransition(mediaItem, reason)
 
@@ -57,27 +60,38 @@ class PlayerViewModel(
         }
     }
 
-    fun setLike(idMedia: String){
+    fun setLike(idMedia: String) {
         viewModelScope.launch {
-            musicPlayerRepository.setTrackLike(idMedia)
-            checkLikeTrack(idMedia)
+            try {
+                musicPlayerRepository.setTrackLike(idMedia)
+                checkLikeTrack(idMedia)
+            } catch (_: Exception) {
+
+            }
         }
     }
 
-    fun deleteLike(idMedia: String){
+    fun deleteLike(idMedia: String) {
         viewModelScope.launch {
-            musicPlayerRepository.deleteTrackLike(idMedia)
-            checkLikeTrack(idMedia)
+            try {
+                musicPlayerRepository.deleteTrackLike(idMedia)
+                checkLikeTrack(idMedia)
+            } catch (_: Exception) {
+
+            }
         }
     }
 
-    private suspend fun checkLikeResponse(idMedia: String): Boolean {
+    private suspend fun checkLikeResponse(idMedia: String): Int {
         return withContext(Dispatchers.IO) {
             try {
                 musicPlayerRepository.checkTrackLike(idMedia)
-                true
+                1
+            } catch (e: ConnectException) {
+                LikeState.NotConnection
+                2
             } catch (e: Exception) {
-                false
+                0
             }
         }
     }
@@ -85,10 +99,12 @@ class PlayerViewModel(
     fun checkLikeTrack(idMedia: String) {
         viewModelScope.launch {
             val result = checkLikeResponse(idMedia)
-            likeState = if (result) {
+            likeState = if (result == 1) {
                 LikeState.Like
-            } else {
+            } else if (result == 0){
                 LikeState.Dislike
+            } else{
+                LikeState.NotConnection
             }
         }
     }

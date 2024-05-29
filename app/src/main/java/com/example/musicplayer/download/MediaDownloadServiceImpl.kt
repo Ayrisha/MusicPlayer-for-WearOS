@@ -14,7 +14,7 @@ import androidx.media3.exoplayer.scheduler.Scheduler
 import com.example.musicplayer.MusicApplication
 
 @androidx.annotation.OptIn(UnstableApi::class)
-class MediaDownloadServiceImpl : DownloadService(1) {
+class MediaDownloadServiceImpl : DownloadService(1, 1000) {
 
     override fun onCreate() {
         super.onCreate()

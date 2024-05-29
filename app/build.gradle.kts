@@ -123,6 +123,14 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.media3:media3-ui:1.3.1")
+
+
+    testImplementation ("org.mockito:mockito-core:1.13.10")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:1.13.10")
+    testImplementation ("io.mockk:mockk:1.13.10")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")

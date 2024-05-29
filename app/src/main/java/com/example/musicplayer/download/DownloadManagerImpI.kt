@@ -3,7 +3,6 @@ package com.example.musicplayer.download
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.IntentFilter
 import android.net.Uri
 import android.util.Log
 import androidx.media3.database.StandaloneDatabaseProvider
@@ -15,6 +14,7 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
+import com.example.musicplayer.ui.viewModel.state.LoadTrackState
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -25,6 +25,7 @@ class DownloadManagerImpl(
     private val downloadManager: DownloadManager
     private val downloadCache: SimpleCache
     private val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+    var downloadCompleteListener: ((String) -> Unit)? = null
 
     init {
         val databaseProvider = StandaloneDatabaseProvider(context)
@@ -103,12 +104,7 @@ class DownloadManagerImpl(
                 .setData(dataBytes)
                 .build()
 
-        val downloadImgRequest =
-            DownloadRequest.Builder(/* id = */ id + "img", /* uri = */ Uri.parse(imgUrl))
-                .build()
-
         downloadManager.addDownload(downloadTrackRequest)
-        downloadManager.addDownload(downloadImgRequest)
 
         DownloadService.sendAddDownload(
             context,
@@ -118,22 +114,29 @@ class DownloadManagerImpl(
         )
     }
 
-    fun isSongDownloaded(songId: String): Boolean {
-        val downloads = downloadManager.downloadIndex.getDownloads(Download.STATE_COMPLETED)
+    fun isSongDownloaded(songId: String): LoadTrackState {
+        val downloads = downloadManager.downloadIndex.getDownloads()
 
         if (downloads.moveToFirst()) {
             do {
                 val download = downloads.download
                 val mediaId = download.request.id
                 if (mediaId == songId) {
+                    Log.d("isSongDownloaded", "${download.percentDownloaded}")
+                    val state = when (download.state) {
+                        Download.STATE_COMPLETED -> LoadTrackState.Load
+                        Download.STATE_QUEUED -> LoadTrackState.Progress(percent = download.percentDownloaded.toInt())
+                        Download.STATE_DOWNLOADING -> LoadTrackState.Progress(percent = download.percentDownloaded.toInt())
+                        else -> LoadTrackState.Unload
+                    }
                     downloads.close()
-                    return true
+                    return state
                 }
             } while (downloads.moveToNext())
         }
 
         downloads.close()
-        return false
+        return LoadTrackState.Unload
     }
 
     private inner class DownloadManagerListener : DownloadManager.Listener {
@@ -144,18 +147,24 @@ class DownloadManagerImpl(
         ) {
             when (download.state) {
                 Download.STATE_QUEUED -> Log.d("DownloadManagerListener", "Загрузка ожидает")
-                Download.STATE_DOWNLOADING -> Log.d(
-                    "DownloadManagerListener",
-                    "Загрузка в процессе"
-                )
+                Download.STATE_DOWNLOADING -> {
+                    Log.d(
+                        "DownloadManagerListener",
+                        "Загрузка в процессе"
+                    )
+                    downloadCompleteListener?.invoke(download.request.id)
+                }
 
-                Download.STATE_STOPPED -> Log.d(
-                    "DownloadManagerListener",
-                    "Загрузка приостановлена"
-                )
+                Download.STATE_STOPPED -> {
+                    Log.d(
+                        "DownloadManagerListener",
+                        "Загрузка приостановлена"
+                    )
+                }
 
                 Download.STATE_COMPLETED -> {
                     Log.d("DownloadManagerListener", "Загрузка завершена")
+                    downloadCompleteListener?.invoke(download.request.id)
                 }
 
                 Download.STATE_FAILED -> Log.d("DownloadManagerListener", "Загрузка неудачна")
