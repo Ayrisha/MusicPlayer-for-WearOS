@@ -75,6 +75,10 @@ fun PlayListTracksScreen(
 
     tracksViewModel.getTracks(playlistName)
 
+    LaunchedEffect(key1 = navController.currentBackStackEntry) {
+        tracksViewModel.getTracks(playlistName)
+    }
+
     Scaffold(
         positionIndicator = {
             PositionIndicator(listState)
@@ -147,6 +151,7 @@ fun PlayListTracksScreen(
                             img = "http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${item.imgLink}.png",
                             onClick = {
                                 val image = Uri.encode("http://45.15.158.128:8080/hse/api/v1/music-player-dictionary/image/${item.imgLink}.png")
+                                tracksViewModel.getTracks(playlistName)
                                 navController.navigate(Routes.SongInfoScreen + "/${item.title}/${item.artist}/${item.id}/${image}?playlist=${playlistName}")
                                       },
                             mediaController = mediaController

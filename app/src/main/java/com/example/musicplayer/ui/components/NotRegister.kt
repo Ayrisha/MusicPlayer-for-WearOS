@@ -19,9 +19,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Card
 import com.example.musicplayer.R
+
+@Preview(device = Devices.WEAR_OS_SMALL_ROUND, name = "WEAR_OS_SMALL_ROUND")
+@Preview(device = Devices.WEAR_OS_SQUARE, name = "WEAR_OS_SQUARE")
+@Preview(device = Devices.WEAR_OS_LARGE_ROUND, name = "WEAR_OS_LARGE_ROUND")
+@Composable
+fun PreviewNotRegister() {
+    NotRegister({})
+}
 
 @Composable
 fun NotRegister(

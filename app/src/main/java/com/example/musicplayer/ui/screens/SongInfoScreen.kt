@@ -206,6 +206,7 @@ fun SongInfoScreen(
                                             imgLink = img
                                         )
                                     )
+                                    navController.popBackStack()
                                     pagerState.animateScrollToPage(1)
                                 }
                             })

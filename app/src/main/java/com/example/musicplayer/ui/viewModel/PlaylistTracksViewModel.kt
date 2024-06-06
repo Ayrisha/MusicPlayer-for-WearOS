@@ -68,7 +68,6 @@ class PlaylistTracksViewModel (
     fun deleteTrack(title:String, trackId: String){
         viewModelScope.launch {
             musicPlayerRepository.deletePlayListTrack(title, trackId)
-            getTracks(title)
         }
     }
 

@@ -16,6 +16,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         applicationId = "com.example.musicplayer"
         minSdk = 30
         targetSdk = 34
@@ -124,12 +125,26 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.media3:media3-ui:1.3.1")
 
-
-    testImplementation ("org.mockito:mockito-core:1.13.10")
-    testImplementation ("org.mockito.kotlin:mockito-kotlin:1.13.10")
+    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation ("org.mockito:mockito-core:3.11.2")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("androidx.test.espresso:espresso-core:3.3.0")
+    testImplementation ("androidx.test:runner:1.5.2")
+    testImplementation ("androidx.test:rules:1.5.0")
+    testImplementation ("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation ("androidx.test.uiautomator:uiautomator:2.3.0-alpha03")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
     testImplementation ("io.mockk:mockk:1.13.10")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("org.mockito:mockito-core:3.11.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    testImplementation("androidx.test.uiautomator:uiautomator:2.3.0-alpha03")
+    testImplementation ("org.robolectric:robolectric:4.8.1")
+    testImplementation ("org.robolectric:shadows-multidex:4.8.1")
 
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
@@ -140,6 +155,21 @@ dependencies {
         }
     }
 
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:core:1.5.0")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.3.0")
+    androidTestImplementation( "androidx.test.espresso:espresso-contrib:3.3.0")
+    androidTestImplementation( "androidx.test.espresso:espresso-intents:3.3.0")
+    androidTestImplementation( "androidx.test.espresso:espresso-accessibility:3.3.0")
+    androidTestImplementation( "androidx.test.espresso:espresso-web:3.3.0")
+    androidTestImplementation( "androidx.test.espresso.idling:idling-concurrent:3.3.0")
+    androidTestImplementation( "androidx.test.espresso:espresso-idling-resource:3.3.0")
+    androidTestImplementation ("org.mockito:mockito-android:3.11.2")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.1")
+    androidTestImplementation("androidx.test.ext:truth:1.1.1")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0-alpha03")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
@@ -149,6 +179,7 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

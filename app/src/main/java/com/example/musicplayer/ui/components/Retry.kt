@@ -23,7 +23,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Card
 import androidx.compose.material3.Text
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.musicplayer.R
+import com.example.musicplayer.ui.components.search_bar.RecentSearchItem
+
+@Preview(device = Devices.WEAR_OS_SMALL_ROUND, name = "WEAR_OS_SMALL_ROUND")
+@Preview(device = Devices.WEAR_OS_SQUARE, name = "WEAR_OS_SQUARE")
+@Preview(device = Devices.WEAR_OS_LARGE_ROUND, name = "WEAR_OS_LARGE_ROUND")
+@Composable
+fun PreviewRetry() {
+    Retry({})
+}
 
 @Composable
 fun Retry (

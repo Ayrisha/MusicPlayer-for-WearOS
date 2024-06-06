@@ -1,9 +1,11 @@
 package com.example.musicplayer.ui.components.auth
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.Icon
@@ -29,8 +31,8 @@ import com.example.musicplayer.ui.components.add_playlist.AddTextField
 @Preview(device = Devices.WEAR_OS_SQUARE, name = "WEAR_OS_SQUARE")
 @Preview(device = Devices.WEAR_OS_LARGE_ROUND, name = "WEAR_OS_LARGE_ROUND")
 @Composable
-fun Preview() {
-    CardSigIn(Icons.Rounded.AccountCircle, "Песняdsijkfnso;djfso;jfhkljfhsdlkfhksdjfskijf", {}, ColorPainter(Color.Gray))
+fun PreviewCardSigIn() {
+    CardSigIn(Icons.Rounded.AccountCircle, "Войти с помощью Google", {}, ColorPainter(Color.Gray))
 }
 
 @Composable
@@ -43,7 +45,7 @@ fun CardSigIn(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxSize()
+            .wrapContentSize()
             .padding(start = 20.dp, end = 20.dp, bottom = padding),
         onClick = onClick,
         backgroundPainter = backgroundPainter,

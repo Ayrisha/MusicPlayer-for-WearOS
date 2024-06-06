@@ -2,7 +2,6 @@ package com.example.musicplayer.media
 
 import android.content.Intent
 import androidx.annotation.OptIn
-import androidx.media3.common.AudioAttributes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -11,7 +10,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import androidx.media3.ui.WearUnsuitableOutputPlaybackSuppressionResolverListener
 import com.example.musicplayer.MusicApplication
 
 class PlaybackService : MediaSessionService() {

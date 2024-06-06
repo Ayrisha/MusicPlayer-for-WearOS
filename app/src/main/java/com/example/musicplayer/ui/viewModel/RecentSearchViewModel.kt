@@ -31,19 +31,15 @@ class RecentSearchViewModel(
         viewModelScope.launch {
             myDataStore.recentSearches.collect { searches ->
                 _recentSearches.value = searches.filter { it.isNotBlank() }
-                Log.d("RecentSearchViewModel", "Collected searches from DataStore: ${_recentSearches.value}")
                 updateRecentSearchState( _recentSearches.value)
             }
         }
     }
 
-    private fun updateRecentSearchState(searches: List<String>) {
-        Log.d("RecentSearchViewModel", "RecentSearchState: $searches")
+    fun updateRecentSearchState(searches: List<String>) {
         recentSearchState = if (searches.isEmpty()) {
-            Log.d("RecentSearchViewModel", "RecentSearchState: empty")
             RecentSearchState.Empty
         } else {
-            Log.d("RecentSearchViewModel", "RecentSearchState: NotEmpty")
             RecentSearchState.Success(searches)
         }
     }
@@ -54,16 +50,12 @@ class RecentSearchViewModel(
 
     fun setSearch(query: String) {
         if (query.isBlank()) return
-        Log.d("RecentSearchViewModel", "SetSearch: $query")
 
         viewModelScope.launch {
-            Log.d("RecentSearchViewModel", "Current searches before addition: ${_recentSearches.value}")
 
             if (!_recentSearches.value.contains(query)) {
                 val updatedSearches = _recentSearches.value.toMutableList()
                 updatedSearches.add(0, query)
-
-                Log.d("RecentSearchViewModel", "Updated searches after addition: $updatedSearches")
 
                 if (updatedSearches.size > 5) {
                     updatedSearches.removeAt(updatedSearches.size - 1)
@@ -71,16 +63,13 @@ class RecentSearchViewModel(
 
                 _recentSearches.value = updatedSearches
 
-                Log.d("RecentSearchViewModel", "Final searches to be saved: $updatedSearches")
-
                 myDataStore.updateRecentSearches(updatedSearches)
 
                 myDataStore.recentSearches.collect { searches ->
                     val savedSearches = searches.joinToString(", ")
-                    Log.d("RecentSearchViewModel", "Saved searches after update: $savedSearches")
                 }
             } else {
-                Log.d("RecentSearchViewModel", "Query already exists: $query")
+
             }
         }
     }

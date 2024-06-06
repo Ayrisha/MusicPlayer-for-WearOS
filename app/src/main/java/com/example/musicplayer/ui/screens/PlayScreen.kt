@@ -96,7 +96,7 @@ fun PlayScreen(
                                 playerViewModel.deleteLike(mediaController.currentMediaItem?.mediaId.toString())
                             }
 
-                            LikeState.NotConnection -> TODO()
+                            LikeState.NotConnection -> {}
                         }
                     }
                 }

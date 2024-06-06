@@ -12,10 +12,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import com.example.musicplayer.media.MediaManager
+import com.example.musicplayer.ui.components.auth.UserInfoScreen
 import com.example.musicplayer.ui.viewModel.state.TrackListState
 import kotlinx.coroutines.launch
 

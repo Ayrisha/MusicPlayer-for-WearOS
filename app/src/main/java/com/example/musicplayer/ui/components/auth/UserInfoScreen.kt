@@ -18,9 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.dialog.Confirmation
 import androidx.wear.compose.material.dialog.DialogDefaults
 import coil.compose.AsyncImage
@@ -28,8 +31,17 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.musicplayer.MusicApplication
 import com.example.musicplayer.R
+import com.example.musicplayer.ui.components.add_playlist.AddTextField
 import com.example.musicplayer.ui.screens.NavigationDestinations
 import kotlinx.coroutines.launch
+
+@Preview(device = Devices.WEAR_OS_SMALL_ROUND, name = "WEAR_OS_SMALL_ROUND")
+@Preview(device = Devices.WEAR_OS_SQUARE, name = "WEAR_OS_SQUARE")
+@Preview(device = Devices.WEAR_OS_LARGE_ROUND, name = "WEAR_OS_LARGE_ROUND")
+@Composable
+fun PreviewUserInfoScreen() {
+    UserInfoScreen("1", "name", "email", rememberNavController(), " ")
+}
 
 @Composable
 fun UserInfoScreen(
